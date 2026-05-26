@@ -5,6 +5,7 @@ import type { MoveEvent, MoveType } from '../../types';
 interface CommandStatsBarProps {
   events: MoveEvent[];
   totalPeople: number;
+  lastCollectorPoll: number | null;
 }
 
 const springConfig = { stiffness: 300, damping: 30 };
@@ -30,23 +31,17 @@ const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   role_change: 'bg-move-role-change',
 };
 
-export function CommandStatsBar({ events, totalPeople }: CommandStatsBarProps) {
-  const [secondsAgo, setSecondsAgo] = useState(0);
-  const [lastEventTime, setLastEventTime] = useState<number>(Date.now());
+export function CommandStatsBar({ events, totalPeople, lastCollectorPoll }: CommandStatsBarProps) {
+  const [secondsAgo, setSecondsAgo] = useState<number | null>(null);
 
   useEffect(() => {
-    if (events.length > 0) {
-      setLastEventTime(Date.now());
-      setSecondsAgo(0);
-    }
-  }, [events]);
-
-  useEffect(() => {
+    if (lastCollectorPoll === null) return;
+    setSecondsAgo(Math.floor((Date.now() - lastCollectorPoll) / 1000));
     const interval = setInterval(() => {
-      setSecondsAgo(Math.floor((Date.now() - lastEventTime) / 1000));
+      setSecondsAgo(Math.floor((Date.now() - lastCollectorPoll) / 1000));
     }, 1000);
     return () => clearInterval(interval);
-  }, [lastEventTime]);
+  }, [lastCollectorPoll]);
 
   const stats = useMemo(() => {
     const now = Date.now();
@@ -159,14 +154,16 @@ export function CommandStatsBar({ events, totalPeople }: CommandStatsBarProps) {
       <div className="w-px h-4 bg-border shrink-0" />
 
       {/* Last updated */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">
-          updated
-        </span>
-        <span className="font-heading text-sm text-foreground tabular-nums">
-          {formatTime(secondsAgo)}
-        </span>
-      </div>
+      {secondsAgo !== null && (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">
+            updated
+          </span>
+          <span className="font-heading text-sm text-foreground tabular-nums">
+            {formatTime(secondsAgo)}
+          </span>
+        </div>
+      )}
 
       {/* Most active company */}
       {stats.topCompany && (

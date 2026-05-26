@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Activity } from 'lucide-react';
 import { useMoveEvents } from '../hooks/useMoveEvents';
-import { subscribePeople } from '../services/firestore';
+import { subscribePeople, subscribeConfig } from '../services/firestore';
+import type { AppConfig } from '../types';
 import {
   HorizontalFilterBar,
   type DashboardFilters,
@@ -54,10 +55,27 @@ export default function Dashboard() {
 
   const { events, loading } = useMoveEvents({ status: 'published', maxResults: 100 });
   const [people, setPeople] = useState<Person[]>([]);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
 
   useEffect(() => {
     return subscribePeople(setPeople);
   }, []);
+
+  useEffect(() => {
+    return subscribeConfig(setAppConfig);
+  }, []);
+
+  const lastCollectorPoll = useMemo(() => {
+    if (!appConfig?.collectors) return null;
+    let latest: number | null = null;
+    for (const c of Object.values(appConfig.collectors)) {
+      if (c.lastRunAt) {
+        const t = c.lastRunAt.toDate().getTime();
+        if (latest === null || t > latest) latest = t;
+      }
+    }
+    return latest;
+  }, [appConfig]);
 
   const peopleMap = useMemo(
     () => new Map(people.map((p) => [p.id, p])),
@@ -138,7 +156,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-64px)]">
       {/* Command Stats Bar — full width */}
-      <CommandStatsBar events={events} totalPeople={people.length} />
+      <CommandStatsBar events={events} totalPeople={people.length} lastCollectorPoll={lastCollectorPoll} />
 
       {/* Live Ticker Bar — full width, right under stats */}
       <LiveTickerBar events={events} people={peopleMap} />
