@@ -73,7 +73,17 @@ export async function runLinkedin(personIds?: string[]): Promise<void> {
         company: item.company,
         title: item.title,
         location: item.location,
+        profilePicture: item.profilePicture ?? item.profileImageUrl ?? null,
       };
+
+      // Update photoUrl if the person doesn't have one and Apify returned a photo
+      const photoUrl = currentData.profilePicture;
+      if (photoUrl && typeof photoUrl === 'string') {
+        const personSnap = await db().collection('people').doc(person.id).get();
+        if (!personSnap.data()?.photoUrl) {
+          await db().collection('people').doc(person.id).update({ photoUrl });
+        }
+      }
 
       await saveSnapshot({
         personId: person.id,
