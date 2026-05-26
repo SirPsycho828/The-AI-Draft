@@ -9,7 +9,9 @@ const firestore_1 = require("firebase-admin/firestore");
 const rss_parser_1 = __importDefault(require("rss-parser"));
 const collector_base_1 = require("../utils/collector-base");
 const SOURCE = 'news';
-const db = (0, firestore_1.getFirestore)();
+function db() {
+    return (0, firestore_1.getFirestore)();
+}
 const parser = new rss_parser_1.default();
 const RSS_FEEDS = [
     'https://techcrunch.com/category/artificial-intelligence/feed/',
@@ -47,7 +49,7 @@ exports.newsRssCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 6 hour
             }
         }
         if (relevantItems.length > 0) {
-            await db.collection('snapshots').add({
+            await db().collection('snapshots').add({
                 personId: '_news_feed',
                 source: SOURCE,
                 data: { items: relevantItems },

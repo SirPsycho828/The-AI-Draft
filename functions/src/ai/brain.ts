@@ -3,7 +3,9 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import fetch from 'node-fetch';
 import { defineSecret } from 'firebase-functions/params';
 
-const db = getFirestore();
+function db() {
+  return getFirestore();
+}
 const openrouterApiKey = defineSecret('OPENROUTER_API_KEY');
 
 interface BrainResponse {
@@ -27,12 +29,12 @@ export const aiBrain = onDocumentCreated(
     const change = snap.data();
     const personId = event.params.personId;
 
-    const personSnap = await db.collection('people').doc(personId).get();
+    const personSnap = await db().collection('people').doc(personId).get();
     if (!personSnap.exists) return;
     const person = personSnap.data()!;
 
     const fiveMinAgo = Timestamp.fromMillis(Date.now() - 5 * 60 * 1000);
-    const recentChanges = await db
+    const recentChanges = await db()
       .collection('people')
       .doc(personId)
       .collection('rawChanges')
@@ -49,7 +51,7 @@ export const aiBrain = onDocumentCreated(
       };
     });
 
-    const configSnap = await db.collection('config').doc('app').get();
+    const configSnap = await db().collection('config').doc('app').get();
     const config = configSnap.data();
     const model = config?.openrouter?.activeModel ?? 'anthropic/claude-haiku-4-5-20251001';
 
@@ -110,7 +112,7 @@ Respond with ONLY valid JSON (no markdown):
       const result: BrainResponse = JSON.parse(content);
 
       if (result.isRealMove) {
-        await db.collection('moveEvents').add({
+        await db().collection('moveEvents').add({
           personId,
           type: result.type,
           fromOrg: result.fromOrg,
@@ -138,11 +140,11 @@ Respond with ONLY valid JSON (no markdown):
               updates.previousOrgs = [...previousOrgs, result.fromOrg];
             }
           }
-          await db.collection('people').doc(personId).update(updates);
+          await db().collection('people').doc(personId).update(updates);
         }
       }
 
-      const batch = db.batch();
+      const batch = db().batch();
       for (const doc of recentChanges.docs) {
         batch.update(doc.ref, { processed: true });
       }

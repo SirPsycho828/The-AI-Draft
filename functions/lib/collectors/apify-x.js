@@ -7,7 +7,9 @@ const apify_client_1 = require("apify-client");
 const collector_base_1 = require("../utils/collector-base");
 const params_1 = require("firebase-functions/params");
 const SOURCE = 'x';
-const db = (0, firestore_1.getFirestore)();
+function db() {
+    return (0, firestore_1.getFirestore)();
+}
 const apifyApiKey = (0, params_1.defineSecret)('APIFY_API_KEY');
 exports.apifyXCollector = (0, scheduler_1.onSchedule)({
     schedule: 'every 12 hours',
@@ -15,7 +17,7 @@ exports.apifyXCollector = (0, scheduler_1.onSchedule)({
     secrets: [apifyApiKey],
 }, async () => {
     try {
-        const configSnap = await db.collection('config').doc('app').get();
+        const configSnap = await db().collection('config').doc('app').get();
         const config = configSnap.data();
         const actorId = config?.apify?.xActorId;
         if (!actorId) {

@@ -13,7 +13,9 @@ import {
 import { defineSecret } from 'firebase-functions/params';
 
 const SOURCE = 'x';
-const db = getFirestore();
+function db() {
+  return getFirestore();
+}
 const apifyApiKey = defineSecret('APIFY_API_KEY');
 
 export const apifyXCollector = onSchedule(
@@ -24,7 +26,7 @@ export const apifyXCollector = onSchedule(
   },
   async () => {
     try {
-      const configSnap = await db.collection('config').doc('app').get();
+      const configSnap = await db().collection('config').doc('app').get();
       const config = configSnap.data();
       const actorId = config?.apify?.xActorId;
       if (!actorId) {

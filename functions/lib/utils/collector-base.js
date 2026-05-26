@@ -8,9 +8,11 @@ exports.markScanned = markScanned;
 exports.updateCollectorStatus = updateCollectorStatus;
 exports.detectChanges = detectChanges;
 const firestore_1 = require("firebase-admin/firestore");
-const db = (0, firestore_1.getFirestore)();
+function db() {
+    return (0, firestore_1.getFirestore)();
+}
 async function getPeopleWithSource(sourceField, tiers) {
-    const query = db.collection('people');
+    const query = db().collection('people');
     const snap = await query.get();
     return snap.docs
         .map((d) => ({ id: d.id, ...d.data() }))
@@ -23,7 +25,7 @@ async function getPeopleWithSource(sourceField, tiers) {
     });
 }
 async function getLatestSnapshot(personId, source) {
-    const snap = await db
+    const snap = await db()
         .collection('snapshots')
         .where('personId', '==', personId)
         .where('source', '==', source)
@@ -35,22 +37,22 @@ async function getLatestSnapshot(personId, source) {
     return snap.docs[0].data();
 }
 async function saveSnapshot(snapshot) {
-    await db.collection('snapshots').add(snapshot);
+    await db().collection('snapshots').add(snapshot);
 }
 async function writeRawChange(personId, change) {
-    await db
+    await db()
         .collection('people')
         .doc(personId)
         .collection('rawChanges')
         .add({ ...change, processed: false });
 }
 async function markScanned(personId) {
-    await db.collection('people').doc(personId).update({
+    await db().collection('people').doc(personId).update({
         lastScannedAt: firestore_1.Timestamp.now(),
     });
 }
 async function updateCollectorStatus(collectorName, status) {
-    await db
+    await db()
         .collection('config')
         .doc('app')
         .set({

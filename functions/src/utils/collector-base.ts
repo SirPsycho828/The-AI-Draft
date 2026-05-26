@@ -1,13 +1,15 @@
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import type { PersonDoc, RawChange, SnapshotDoc } from '../types';
 
-const db = getFirestore();
+function db() {
+  return getFirestore();
+}
 
 export async function getPeopleWithSource(
   sourceField: keyof PersonDoc['sources'],
   tiers?: string[]
 ): Promise<PersonDoc[]> {
-  const query = db.collection('people') as FirebaseFirestore.Query;
+  const query = db().collection('people') as FirebaseFirestore.Query;
   const snap = await query.get();
   return snap.docs
     .map((d) => ({ id: d.id, ...d.data() }) as PersonDoc)
@@ -22,7 +24,7 @@ export async function getLatestSnapshot(
   personId: string,
   source: string
 ): Promise<SnapshotDoc | null> {
-  const snap = await db
+  const snap = await db()
     .collection('snapshots')
     .where('personId', '==', personId)
     .where('source', '==', source)
@@ -34,14 +36,14 @@ export async function getLatestSnapshot(
 }
 
 export async function saveSnapshot(snapshot: SnapshotDoc): Promise<void> {
-  await db.collection('snapshots').add(snapshot);
+  await db().collection('snapshots').add(snapshot);
 }
 
 export async function writeRawChange(
   personId: string,
   change: Omit<RawChange, 'processed'>
 ): Promise<void> {
-  await db
+  await db()
     .collection('people')
     .doc(personId)
     .collection('rawChanges')
@@ -49,7 +51,7 @@ export async function writeRawChange(
 }
 
 export async function markScanned(personId: string): Promise<void> {
-  await db.collection('people').doc(personId).update({
+  await db().collection('people').doc(personId).update({
     lastScannedAt: Timestamp.now(),
   });
 }
@@ -58,7 +60,7 @@ export async function updateCollectorStatus(
   collectorName: string,
   status: 'success' | 'error'
 ): Promise<void> {
-  await db
+  await db()
     .collection('config')
     .doc('app')
     .set(
