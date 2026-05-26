@@ -26,6 +26,14 @@ async function loadCollector(name: string): Promise<() => Promise<void>> {
       const { runX } = await import('../collectors/apify-x');
       return () => runX();
     }
+    case 'arxiv': {
+      const { runArxiv } = await import('../collectors/arxiv');
+      return runArxiv;
+    }
+    case 'company_site': {
+      const { runCompanySite } = await import('../collectors/company-site');
+      return runCompanySite;
+    }
     default:
       throw new HttpsError('invalid-argument', `Unknown collector: ${name}`);
   }
