@@ -10,3 +10,4 @@ export { apifyXCollector } from './collectors/apify-x';
 export { aiBrain } from './ai/brain';
 export { setAdminRole } from './admin/set-admin';
 export { runCollectorNow } from './admin/run-collector';
+export { verifySource } from './admin/verify-source';
