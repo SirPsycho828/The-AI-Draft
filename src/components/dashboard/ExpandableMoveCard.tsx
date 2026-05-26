@@ -41,7 +41,7 @@ export function ExpandableMoveCard({ event, person }: ExpandableMoveCardProps) {
           name={person?.name ?? 'Unknown'}
           photoUrl={person?.photoUrl}
           tier={person?.tier ?? 'emerging'}
-          size={expanded ? 'md' : 'md'}
+          size="md"
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">

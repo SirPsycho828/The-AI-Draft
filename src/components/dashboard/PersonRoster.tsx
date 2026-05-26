@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { Person } from '../../types';
 import { PersonRosterRow } from './PersonRosterRow';
-
-const TIER_ORDER = { legendary: 0, senior: 1, notable: 2, emerging: 3 } as const;
+import { TIER_ORDER } from '../../utils/tierOrder';
 
 interface PersonRosterProps {
   people: Person[];
