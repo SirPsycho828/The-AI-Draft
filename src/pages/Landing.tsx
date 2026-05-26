@@ -2,18 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Zap, ArrowRight } from 'lucide-react';
-
-/* ─── Marquee ticker data (sample moves for the landing page) ─── */
-const sampleMoves = [
-  { type: 'DEPARTURE', text: 'Ilya Sutskever left OpenAI', color: 'text-destructive' },
-  { type: 'NEW HIRE', text: 'Dario Amodei promoted at Anthropic', color: 'text-success' },
-  { type: 'FOUNDED', text: 'Andrej Karpathy launched Eureka Labs', color: 'text-move-founded' },
-  { type: 'DEPARTURE', text: 'Mira Murati departed OpenAI', color: 'text-destructive' },
-  { type: 'NEW HIRE', text: 'Noam Brown joined OpenAI from Meta', color: 'text-success' },
-  { type: 'ACADEMIC', text: 'Fei-Fei Li returned to Stanford', color: 'text-move-academic' },
-  { type: 'FOUNDED', text: 'Mustafa Suleyman founded Inflection AI', color: 'text-move-founded' },
-  { type: 'NEW HIRE', text: 'Jim Fan joined NVIDIA Research', color: 'text-success' },
-];
+import { useLandingMoves } from '../hooks/useLandingMoves';
 
 const stats = [
   { value: '50+', label: 'COMPANIES TRACKED' },
@@ -66,8 +55,8 @@ function AnimatedStat({ value, label }: { value: string; label: string }) {
 }
 
 /* ─── Marquee ticker component ─── */
-function TickerMarquee() {
-  const items = [...sampleMoves, ...sampleMoves]; // duplicate for seamless loop
+function TickerMarquee({ moves }: { moves: { type: string; text: string; color: string }[] }) {
+  const items = [...moves, ...moves]; // duplicate for seamless loop
 
   return (
     <div className="overflow-hidden border-y border-border bg-card/50 py-3">
@@ -115,6 +104,7 @@ function SourceMarquee() {
 export default function Landing() {
   const pipelineRef = useRef(null);
   const pipelineInView = useInView(pipelineRef, { once: true, amount: 0.2 });
+  const tickerMoves = useLandingMoves();
 
   return (
     <div className="overflow-hidden">
@@ -181,7 +171,7 @@ export default function Landing() {
       </section>
 
       {/* ═══ TICKER STRIP ═══ */}
-      <TickerMarquee />
+      <TickerMarquee moves={tickerMoves} />
 
       {/* ═══ STATS — Large Typography ═══ */}
       <section className="py-20 sm:py-28 px-4 sm:px-8 max-w-[1400px] mx-auto">
@@ -230,7 +220,7 @@ export default function Landing() {
       </section>
 
       {/* ═══ SECOND TICKER ═══ */}
-      <TickerMarquee />
+      <TickerMarquee moves={tickerMoves} />
 
       {/* ═══ CLOSING CTA ═══ */}
       <section className="py-24 sm:py-36 px-4 sm:px-8 max-w-[1400px] mx-auto text-center">
