@@ -31,51 +31,6 @@ const pipeline = [
   },
 ];
 
-/* ─── Floating glass shape — adapted from 21st.dev Geometric ─── */
-function FloatingShape({
-  className,
-  delay = 0,
-  width = 400,
-  height = 100,
-  rotate = 0,
-  gradient = 'from-primary/[0.08]',
-  duration = 12,
-}: {
-  className?: string;
-  delay?: number;
-  width?: number;
-  height?: number;
-  rotate?: number;
-  gradient?: string;
-  duration?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -100, rotate: rotate - 15 }}
-      animate={{ opacity: 1, y: 0, rotate }}
-      transition={{
-        duration: 2.4,
-        delay,
-        ease: [0.23, 0.86, 0.39, 0.96],
-        opacity: { duration: 1.2 },
-      }}
-      className={`absolute ${className ?? ''}`}
-    >
-      <motion.div
-        animate={{ y: [0, 15, 0] }}
-        transition={{ duration, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ width, height }}
-        className="relative"
-      >
-        <div
-          className={`absolute inset-0 rounded-full bg-gradient-to-r to-transparent ${gradient} backdrop-blur-[2px] border border-white/[0.07]`}
-          style={{ boxShadow: '0 8px 32px 0 rgba(200, 243, 29, 0.06)' }}
-        />
-      </motion.div>
-    </motion.div>
-  );
-}
-
 /* ─── Animated counter component ─── */
 function AnimatedStat({ value, label }: { value: string; label: string }) {
   const ref = useRef(null);
@@ -101,10 +56,10 @@ function AnimatedStat({ value, label }: { value: string; label: string }) {
 
 /* ─── Marquee ticker component ─── */
 function TickerMarquee({ moves }: { moves: { type: string; text: string; color: string }[] }) {
-  const items = [...moves, ...moves]; // duplicate for seamless loop
+  const items = [...moves, ...moves];
 
   return (
-    <div className="overflow-hidden border-y border-border bg-card/50 py-3">
+    <div className="overflow-hidden border-y border-border bg-card/50 py-3 relative z-10">
       <div className="animate-ticker flex whitespace-nowrap gap-12 hover:[animation-play-state:paused]">
         {items.map((move, i) => (
           <div key={i} className="flex items-center gap-2 shrink-0">
@@ -127,7 +82,7 @@ function SourceMarquee() {
   const items = [...sources, ...sources, ...sources];
 
   return (
-    <div className="overflow-hidden py-6">
+    <div className="overflow-hidden py-6 relative z-10">
       <div
         className="flex whitespace-nowrap gap-8 animate-ticker"
         style={{ animationDuration: '20s' }}
@@ -153,86 +108,50 @@ export default function Landing() {
 
   return (
     <div className="overflow-hidden relative">
-      {/* ═══ FLOATING SHAPES — full-page background layer ═══ */}
+      {/* ═══ ANIMATED BACKGROUND — drifting gradient blobs ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Ambient gradient base */}
+        {/* Dot grid texture */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
-            background: 'radial-gradient(ellipse 80% 60% at 70% 20%, rgba(200, 243, 29, 0.06), transparent 70%), radial-gradient(ellipse 60% 50% at 20% 80%, rgba(200, 243, 29, 0.03), transparent 60%)',
+            backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
           }}
         />
 
-        {/* Floating glass shapes */}
-        <FloatingShape
-          delay={0.2}
-          width={550}
-          height={140}
-          rotate={12}
-          gradient="from-[rgba(200,243,29,0.12)]"
-          className="right-[-8%] top-[12%]"
-          duration={14}
+        {/* Drifting gradient orbs — pure CSS, always moving */}
+        <div
+          className="absolute w-[800px] h-[600px] top-[-10%] right-[-10%] rounded-full opacity-100"
+          style={{
+            background: 'radial-gradient(circle, rgba(200, 243, 29, 0.07) 0%, rgba(200, 243, 29, 0.02) 40%, transparent 70%)',
+            animation: 'drift-1 20s ease-in-out infinite',
+          }}
         />
-        <FloatingShape
-          delay={0.5}
-          width={450}
-          height={110}
-          rotate={-15}
-          gradient="from-[rgba(200,243,29,0.08)]"
-          className="left-[-5%] top-[55%]"
-          duration={16}
+        <div
+          className="absolute w-[600px] h-[500px] bottom-[10%] left-[-8%] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, rgba(59, 130, 246, 0.015) 40%, transparent 70%)',
+            animation: 'drift-2 25s ease-in-out infinite',
+          }}
         />
-        <FloatingShape
-          delay={0.4}
-          width={350}
-          height={90}
-          rotate={-8}
-          gradient="from-[rgba(59,130,246,0.10)]"
-          className="right-[10%] top-[65%]"
-          duration={13}
+        <div
+          className="absolute w-[500px] h-[400px] top-[40%] right-[5%] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 40%, transparent 70%)',
+            animation: 'drift-3 22s ease-in-out infinite',
+          }}
         />
-        <FloatingShape
-          delay={0.7}
-          width={220}
-          height={60}
-          rotate={20}
-          gradient="from-[rgba(245,158,11,0.09)]"
-          className="left-[15%] top-[25%]"
-          duration={11}
+        <div
+          className="absolute w-[700px] h-[500px] top-[60%] left-[20%] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(200, 243, 29, 0.05) 0%, rgba(200, 243, 29, 0.01) 40%, transparent 70%)',
+            animation: 'drift-4 28s ease-in-out infinite',
+          }}
         />
-        <FloatingShape
-          delay={0.9}
-          width={280}
-          height={70}
-          rotate={-20}
-          gradient="from-[rgba(200,243,29,0.07)]"
-          className="right-[25%] top-[85%]"
-          duration={15}
-        />
-        <FloatingShape
-          delay={1.1}
-          width={200}
-          height={55}
-          rotate={8}
-          gradient="from-[rgba(59,130,246,0.07)]"
-          className="left-[40%] top-[8%]"
-          duration={17}
-        />
-
-        {/* Top/bottom fade for seamless blend */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background pointer-events-none" />
       </div>
 
       {/* ═══ HERO ═══ */}
       <section className="min-h-[85vh] flex flex-col justify-center px-4 sm:px-8 max-w-[1400px] mx-auto relative">
-        {/* Hero radial glow — gives depth behind the text */}
-        <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[600px] h-[500px] pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at 30% 50%, rgba(200, 243, 29, 0.08) 0%, transparent 70%)',
-          }}
-        />
-
         <div className="relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -338,13 +257,6 @@ export default function Landing() {
 
       {/* ═══ CLOSING CTA ═══ */}
       <section className="relative py-24 sm:py-36 px-4 sm:px-8 max-w-[1400px] mx-auto text-center">
-        {/* CTA glow */}
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(200, 243, 29, 0.05) 0%, transparent 70%)',
-          }}
-        />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
