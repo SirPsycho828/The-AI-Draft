@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
@@ -32,19 +32,30 @@ function orgLine(event: MoveEvent): string {
 export function ExpandableMoveCard({ event, person }: ExpandableMoveCardProps) {
   const [expanded, setExpanded] = useState(false);
 
+  const isBreaking = useMemo(() => {
+    const ms = Date.now() - event.detectedAt.toDate().getTime();
+    return ms < 24 * 60 * 60 * 1000;
+  }, [event.detectedAt]);
+
   return (
     <div
-      className="bg-card border border-border rounded-[var(--radius-lg)] p-5 hover:border-primary/20 transition-all duration-[var(--duration-fast)] cursor-pointer"
+      className={`bg-card border rounded-[var(--radius-lg)] p-5 cursor-pointer transition-all duration-150 ease-out group
+        ${isBreaking
+          ? 'border-l-2 border-l-primary border-t-border border-r-border border-b-border animate-flash-border'
+          : 'border-border'}
+        hover:border-primary/25 hover:-translate-y-0.5 hover:shadow-md`}
       onClick={() => setExpanded((prev) => !prev)}
     >
       {/* Collapsed: always visible */}
       <div className="flex items-start gap-3">
-        <PersonAvatar
-          name={person?.name ?? 'Unknown'}
-          photoUrl={person?.photoUrl}
-          tier={person?.tier ?? 'emerging'}
-          size="md"
-        />
+        <div className="transition-transform duration-150 group-hover:scale-105">
+          <PersonAvatar
+            name={person?.name ?? 'Unknown'}
+            photoUrl={person?.photoUrl}
+            tier={person?.tier ?? 'emerging'}
+            size="md"
+          />
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">
             <Link
@@ -72,6 +83,11 @@ export function ExpandableMoveCard({ event, person }: ExpandableMoveCardProps) {
       <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
         <span>{event.signals.length} signal{event.signals.length !== 1 ? 's' : ''}</span>
         <div className="flex items-center gap-2">
+          {isBreaking && (
+            <span className="text-[0.5625rem] font-700 tracking-[0.08em] uppercase text-primary animate-pulse">
+              JUST IN
+            </span>
+          )}
           <span>{timeAgo(event.detectedAt)}</span>
           <ChevronDown
             size={14}
@@ -126,7 +142,18 @@ export function ExpandableMoveCard({ event, person }: ExpandableMoveCardProps) {
                 </div>
               )}
 
-              {person && <SocialIcons sources={person.sources} className="pt-1" />}
+              {person && (
+                <div className="flex items-center justify-between pt-1">
+                  <SocialIcons sources={person.sources} />
+                  <Link
+                    to={`/person/${person.slug}`}
+                    className="text-[0.625rem] font-700 tracking-[0.08em] uppercase text-primary hover:brightness-110 transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Full Profile &rarr;
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
