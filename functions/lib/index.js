@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.aiBrain = exports.apifyXCollector = exports.apifyLinkedinCollector = exports.newsRssCollector = exports.githubBiosCollector = exports.semanticScholarCollector = void 0;
+exports.setAdminRole = exports.aiBrain = exports.apifyXCollector = exports.apifyLinkedinCollector = exports.newsRssCollector = exports.githubBiosCollector = exports.semanticScholarCollector = void 0;
 const app_1 = require("firebase-admin/app");
 (0, app_1.initializeApp)();
 var semantic_scholar_1 = require("./collectors/semantic-scholar");
@@ -15,4 +15,6 @@ var apify_x_1 = require("./collectors/apify-x");
 Object.defineProperty(exports, "apifyXCollector", { enumerable: true, get: function () { return apify_x_1.apifyXCollector; } });
 var brain_1 = require("./ai/brain");
 Object.defineProperty(exports, "aiBrain", { enumerable: true, get: function () { return brain_1.aiBrain; } });
+var set_admin_1 = require("./admin/set-admin");
+Object.defineProperty(exports, "setAdminRole", { enumerable: true, get: function () { return set_admin_1.setAdminRole; } });
 //# sourceMappingURL=index.js.map
