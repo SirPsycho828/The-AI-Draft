@@ -6,7 +6,9 @@ import {
 } from '../utils/collector-base';
 
 const SOURCE = 'news';
-const db = getFirestore();
+function db() {
+  return getFirestore();
+}
 const parser = new Parser();
 
 const RSS_FEEDS = [
@@ -58,7 +60,7 @@ export const newsRssCollector = onSchedule(
       }
 
       if (relevantItems.length > 0) {
-        await db.collection('snapshots').add({
+        await db().collection('snapshots').add({
           personId: '_news_feed',
           source: SOURCE,
           data: { items: relevantItems },
