@@ -116,6 +116,17 @@ export async function getMoveEventsForPerson(personId: string): Promise<MoveEven
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as MoveEvent);
 }
 
+export async function getRecentPublishedMoves(count: number): Promise<MoveEvent[]> {
+  const q = query(
+    collection(db, 'moveEvents'),
+    where('status', '==', 'published'),
+    orderBy('detectedAt', 'desc'),
+    limit(count)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as MoveEvent);
+}
+
 export async function updateMoveEvent(id: string, data: Partial<MoveEvent>): Promise<void> {
   await updateDoc(doc(db, 'moveEvents', id), data);
 }
