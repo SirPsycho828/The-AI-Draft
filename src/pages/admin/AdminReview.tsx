@@ -19,11 +19,14 @@ export default function AdminReview() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">Review Queue</h1>
+      <h1 className="font-heading text-2xl tracking-[0.03em] text-foreground mb-6">REVIEW QUEUE</h1>
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-muted-foreground">Loading...</p>
       ) : events.length === 0 ? (
-        <p className="text-gray-500">No pending reviews. All clear!</p>
+        <div className="bg-card border border-border rounded-[var(--radius-lg)] p-8 text-center">
+          <p className="font-heading text-lg text-foreground">ALL CLEAR</p>
+          <p className="text-sm text-muted-foreground mt-1">No pending reviews.</p>
+        </div>
       ) : (
         <div className="space-y-4">
           {events.map((e) => (

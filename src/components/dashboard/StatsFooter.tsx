@@ -19,7 +19,6 @@ export function StatsFooter({ events, people, totalPeople }: StatsFooterProps) {
       (e) => now - e.detectedAt.toDate().getTime() < weekMs
     );
 
-    // Most active company this week
     const companyCounts = new Map<string, number>();
     for (const e of weekEvents) {
       if (e.toOrg) companyCounts.set(e.toOrg, (companyCounts.get(e.toOrg) ?? 0) + 1);
@@ -34,7 +33,6 @@ export function StatsFooter({ events, people, totalPeople }: StatsFooterProps) {
       }
     }
 
-    // Legendary moves today
     const legendaryToday = events.filter((e) => {
       const person = people.get(e.personId);
       return (
@@ -53,16 +51,48 @@ export function StatsFooter({ events, people, totalPeople }: StatsFooterProps) {
   }, [events, people, totalPeople]);
 
   return (
-    <div className="bg-gray-900/50 border-t border-gray-800 px-6 py-3 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500">
-      <span>{stats.totalPeople} people tracked</span>
-      <span>{stats.movesThisWeek} moves this week</span>
+    <div className="bg-card/80 border-t border-border px-6 py-3 flex items-center gap-6 overflow-x-auto">
+      {/* LIVE indicator */}
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+        <span className="text-[0.625rem] font-700 tracking-[0.1em] uppercase text-success">LIVE</span>
+      </div>
+
+      <div className="w-px h-4 bg-border shrink-0" />
+
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="font-heading text-base text-foreground">{stats.totalPeople}</span>
+        <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">tracked</span>
+      </div>
+
+      <div className="w-px h-4 bg-border shrink-0" />
+
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="font-heading text-base text-foreground">{stats.movesThisWeek}</span>
+        <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">this week</span>
+      </div>
+
       {stats.topCompany && (
-        <span>
-          Most active: {stats.topCompany} ({stats.topCount})
-        </span>
+        <>
+          <div className="w-px h-4 bg-border shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">most active:</span>
+            <span className="text-[0.8125rem] font-600 text-accent">{stats.topCompany}</span>
+            <span className="text-[0.625rem] text-muted-foreground">({stats.topCount})</span>
+          </div>
+        </>
       )}
+
       {stats.legendaryToday > 0 && (
-        <span>{stats.legendaryToday} legendary move{stats.legendaryToday !== 1 ? 's' : ''} today</span>
+        <>
+          <div className="w-px h-4 bg-border shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="font-heading text-base text-tier-legendary">{stats.legendaryToday}</span>
+            <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-tier-legendary">
+              legendary today
+            </span>
+          </div>
+        </>
       )}
     </div>
   );

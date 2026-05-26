@@ -6,15 +6,15 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">Admin Overview</h1>
+      <h1 className="font-heading text-2xl tracking-[0.03em] text-foreground mb-6">OVERVIEW</h1>
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <p className="text-3xl font-bold text-yellow-400">{pending.length}</p>
-          <p className="text-sm text-gray-400 mt-1">Pending Reviews</p>
+        <div className="bg-card border border-border rounded-[var(--radius-lg)] p-5">
+          <p className="font-heading text-4xl text-warning">{pending.length}</p>
+          <p className="text-[0.8125rem] text-muted-foreground mt-1">Pending Reviews</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <p className="text-3xl font-bold text-green-400">{published.length}</p>
-          <p className="text-sm text-gray-400 mt-1">Published Moves</p>
+        <div className="bg-card border border-border rounded-[var(--radius-lg)] p-5">
+          <p className="font-heading text-4xl text-success">{published.length}</p>
+          <p className="text-[0.8125rem] text-muted-foreground mt-1">Published Moves</p>
         </div>
       </div>
     </div>

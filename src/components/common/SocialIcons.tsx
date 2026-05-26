@@ -62,7 +62,7 @@ export function SocialIcons({ sources, className = '' }: SocialIconsProps) {
             target="_blank"
             rel="noopener noreferrer"
             title={link.label}
-            className="text-gray-500 hover:text-gray-300 transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors duration-[var(--duration-fast)]"
           >
             <svg
               viewBox="0 0 24 24"

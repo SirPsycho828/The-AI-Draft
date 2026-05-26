@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Search } from 'lucide-react';
 import type { Person } from '../../types';
 import { PersonRosterRow } from './PersonRosterRow';
 import { TIER_ORDER } from '../../utils/tierOrder';
@@ -29,22 +30,25 @@ export function PersonRoster({ people, excludePersonId }: PersonRosterProps) {
   }, [people, excludePersonId, search]);
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl mt-4">
-      <div className="flex items-center justify-between gap-3 p-4 border-b border-gray-800">
-        <h3 className="text-sm font-semibold text-gray-300">
-          Tracked People ({filtered.length})
+    <div className="bg-card border border-border rounded-[var(--radius-lg)] mt-4">
+      <div className="flex items-center justify-between gap-3 p-4 border-b border-border">
+        <h3 className="text-[0.6875rem] font-700 tracking-[0.08em] uppercase text-foreground">
+          Tracked ({filtered.length})
         </h3>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded-lg px-2.5 py-1.5 w-32 focus:outline-none focus:border-gray-600 placeholder-gray-600"
-        />
+        <div className="relative">
+          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-secondary border border-border text-xs text-card-foreground rounded-[var(--radius-md)] pl-7 pr-2.5 py-1.5 w-32 focus:outline-none focus:border-primary/40 placeholder-muted-foreground/60 transition-colors duration-[var(--duration-fast)]"
+          />
+        </div>
       </div>
-      <div className="max-h-[calc(100vh-420px)] overflow-y-auto divide-y divide-gray-800/50">
+      <div className="max-h-[calc(100vh-420px)] overflow-y-auto divide-y divide-border/50">
         {filtered.length === 0 ? (
-          <p className="text-sm text-gray-500 p-4 text-center">No people found</p>
+          <p className="text-sm text-muted-foreground p-4 text-center">No people found</p>
         ) : (
           filtered.map((person) => (
             <PersonRosterRow key={person.id} person={person} />

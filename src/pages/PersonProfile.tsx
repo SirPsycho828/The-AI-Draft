@@ -4,6 +4,7 @@ import { getPersonBySlug, getMoveEventsForPerson } from '../services/firestore';
 import { PersonHeader } from '../components/person/PersonHeader';
 import { SourceLinks } from '../components/person/SourceLinks';
 import { MoveTimeline } from '../components/person/MoveTimeline';
+import { Skeleton } from '../components/common/Skeleton';
 import type { Person, MoveEvent } from '../types';
 
 export default function PersonProfile() {
@@ -27,12 +28,12 @@ export default function PersonProfile() {
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8 animate-pulse">
+      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8 animate-pulse">
         <div className="flex items-center gap-6">
-          <div className="w-20 h-20 rounded-full bg-gray-800" />
+          <Skeleton className="w-20 h-20 rounded-full" />
           <div className="space-y-2">
-            <div className="h-8 bg-gray-800 rounded w-48" />
-            <div className="h-4 bg-gray-800 rounded w-32" />
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32" />
           </div>
         </div>
       </div>
@@ -41,18 +42,19 @@ export default function PersonProfile() {
 
   if (!person) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center text-gray-500">
-        Person not found.
+      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-16 text-center">
+        <p className="font-heading text-lg text-foreground">PERSON NOT FOUND</p>
+        <p className="text-sm text-muted-foreground mt-1">This profile doesn't exist or has been removed.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8 space-y-8">
       <PersonHeader person={person} />
       <SourceLinks sources={person.sources} />
       <div>
-        <h2 className="text-xl font-semibold mb-4">Move History</h2>
+        <h2 className="font-heading text-xl tracking-[0.03em] text-foreground mb-4">MOVE HISTORY</h2>
         <MoveTimeline events={events} />
       </div>
     </div>

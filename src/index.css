@@ -1,1 +1,181 @@
 @import "tailwindcss";
+
+/* ============================================
+   Design System — The AI Draft
+   Direction: Draft Day (ESPN meets Bloomberg)
+   ============================================ */
+
+@theme {
+  /* Typography */
+  --font-heading: "Bebas Neue", Impact, sans-serif;
+  --font-body: "Barlow", system-ui, sans-serif;
+
+  /* Colors — Core */
+  --color-primary: #C8F31D;
+  --color-primary-foreground: #0A0E1A;
+  --color-secondary: #212B3F;
+  --color-secondary-foreground: #DDE2EA;
+  --color-accent: #F59E0B;
+  --color-accent-foreground: #0A0E1A;
+
+  /* Colors — Surfaces */
+  --color-background: #0A0E1A;
+  --color-foreground: #F0F2F5;
+  --color-card: #141B2D;
+  --color-card-foreground: #DDE2EA;
+  --color-muted: #273042;
+  --color-muted-foreground: #7E8A9A;
+
+  /* Colors — Borders & Input */
+  --color-border: #1F2838;
+  --color-input: #273042;
+  --color-ring: #C8F31D;
+
+  /* Colors — Semantic */
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+
+  /* Colors — Tier System */
+  --color-tier-legendary: #F59E0B;
+  --color-tier-senior: #3B82F6;
+  --color-tier-notable: #7E8A9A;
+  --color-tier-emerging: #22C55E;
+
+  /* Colors — Move Types */
+  --color-move-departure: #EF4444;
+  --color-move-new-hire: #22C55E;
+  --color-move-founded: #A855F7;
+  --color-move-academic: #3B82F6;
+  --color-move-returned: #F59E0B;
+  --color-move-role-change: #7E8A9A;
+
+  /* Border Radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(200, 243, 29, 0.05);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 60px rgba(200, 243, 29, 0.1);
+
+  /* Animation — Easing */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Animation — Durations */
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 350ms;
+
+  /* Animation — Keyframes via Tailwind */
+  --animate-ticker: ticker 30s linear infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-flash-border: flash-border 0.6s ease-out;
+  --animate-slide-up: slide-up 0.4s var(--ease-spring);
+  --animate-fade-in: fade-in 0.3s var(--ease-default);
+}
+
+/* Keyframes */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 243, 29, 0); }
+  50% { box-shadow: 0 0 20px 4px rgba(200, 243, 29, 0.3); }
+}
+
+@keyframes flash-border {
+  0% { border-color: var(--color-primary); box-shadow: 0 0 12px rgba(200, 243, 29, 0.4); }
+  100% { border-color: var(--color-border); box-shadow: none; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes number-roll {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Base Styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+h3, h4, h5, h6 {
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+/* Custom Scrollbar — Draft Day theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) var(--color-background);
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(200, 243, 29, 0.25);
+  color: var(--color-foreground);
+}
+
+/* Focus ring style */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

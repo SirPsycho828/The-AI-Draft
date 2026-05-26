@@ -18,29 +18,29 @@ interface HorizontalFilterBarProps {
 }
 
 const MOVE_TYPES: { value: MoveType; label: string; activeClass: string }[] = [
-  { value: 'departure', label: 'Departure', activeClass: 'bg-red-500/20 text-red-400 border-red-500/30' },
-  { value: 'new_hire', label: 'New Hire', activeClass: 'bg-green-500/20 text-green-400 border-green-500/30' },
-  { value: 'founded_startup', label: 'Startup', activeClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-  { value: 'went_academic', label: 'Academic', activeClass: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  { value: 'returned', label: 'Returned', activeClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-  { value: 'role_change', label: 'Role Change', activeClass: 'bg-gray-500/20 text-gray-300 border-gray-500/30' },
+  { value: 'departure', label: 'Departure', activeClass: 'bg-move-departure/20 text-move-departure border-move-departure/30' },
+  { value: 'new_hire', label: 'New Hire', activeClass: 'bg-move-new-hire/20 text-move-new-hire border-move-new-hire/30' },
+  { value: 'founded_startup', label: 'Startup', activeClass: 'bg-move-founded/20 text-move-founded border-move-founded/30' },
+  { value: 'went_academic', label: 'Academic', activeClass: 'bg-move-academic/20 text-move-academic border-move-academic/30' },
+  { value: 'returned', label: 'Returned', activeClass: 'bg-move-returned/20 text-move-returned border-move-returned/30' },
+  { value: 'role_change', label: 'Role Chg', activeClass: 'bg-move-role-change/20 text-move-role-change border-move-role-change/30' },
 ];
 
 const CONFIDENCES: { value: Confidence; label: string; activeClass: string }[] = [
-  { value: 'confirmed', label: 'Confirmed', activeClass: 'bg-green-500/20 text-green-400 border-green-500/30' },
-  { value: 'high', label: 'High', activeClass: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  { value: 'medium', label: 'Medium', activeClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-  { value: 'speculative', label: 'Spec', activeClass: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+  { value: 'confirmed', label: 'Confirmed', activeClass: 'bg-success/20 text-success border-success/30' },
+  { value: 'high', label: 'High', activeClass: 'bg-tier-senior/20 text-tier-senior border-tier-senior/30' },
+  { value: 'medium', label: 'Medium', activeClass: 'bg-warning/20 text-warning border-warning/30' },
+  { value: 'speculative', label: 'Spec', activeClass: 'bg-muted text-muted-foreground border-border' },
 ];
 
 const TIERS: { value: Tier; label: string; activeClass: string }[] = [
-  { value: 'legendary', label: 'L', activeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-  { value: 'senior', label: 'S', activeClass: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  { value: 'notable', label: 'N', activeClass: 'bg-gray-500/20 text-gray-300 border-gray-500/30' },
-  { value: 'emerging', label: 'E', activeClass: 'bg-green-500/20 text-green-400 border-green-500/30' },
+  { value: 'legendary', label: 'L', activeClass: 'bg-tier-legendary/20 text-tier-legendary border-tier-legendary/30' },
+  { value: 'senior', label: 'S', activeClass: 'bg-tier-senior/20 text-tier-senior border-tier-senior/30' },
+  { value: 'notable', label: 'N', activeClass: 'bg-tier-notable/20 text-tier-notable border-tier-notable/30' },
+  { value: 'emerging', label: 'E', activeClass: 'bg-tier-emerging/20 text-tier-emerging border-tier-emerging/30' },
 ];
 
-const INACTIVE_CHIP = 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-600';
+const INACTIVE_CHIP = 'bg-secondary text-muted-foreground border-border hover:border-muted-foreground/30';
 
 function toggleInArray<T>(arr: T[], item: T): T[] {
   return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
@@ -64,7 +64,7 @@ export function HorizontalFilterBar({
   }
 
   return (
-    <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 space-y-3">
+    <div className="bg-card border border-border rounded-[var(--radius-lg)] p-4 space-y-3">
       <div className="flex items-center flex-wrap gap-3">
         {/* Company dropdown */}
         <select
@@ -72,7 +72,7 @@ export function HorizontalFilterBar({
           onChange={(e) =>
             onFiltersChange({ ...filters, company: e.target.value })
           }
-          className="bg-gray-800 border border-gray-700 text-sm text-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-gray-600"
+          className="bg-secondary border border-border text-[0.8125rem] text-card-foreground rounded-[var(--radius-md)] px-3 py-1.5 focus:outline-none focus:border-primary/40 transition-colors duration-[var(--duration-fast)]"
         >
           <option value="">All Companies</option>
           {companies.map((c) => (
@@ -82,8 +82,7 @@ export function HorizontalFilterBar({
           ))}
         </select>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-700" />
+        <div className="w-px h-6 bg-border" />
 
         {/* Move type chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -96,7 +95,7 @@ export function HorizontalFilterBar({
                   types: toggleInArray(filters.types, mt.value),
                 })
               }
-              className={`text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+              className={`text-[0.6875rem] font-600 px-2.5 py-1 rounded-full border transition-all duration-[var(--duration-fast)] ${
                 filters.types.includes(mt.value) ? mt.activeClass : INACTIVE_CHIP
               }`}
             >
@@ -105,8 +104,7 @@ export function HorizontalFilterBar({
           ))}
         </div>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-700" />
+        <div className="w-px h-6 bg-border" />
 
         {/* Confidence chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -119,7 +117,7 @@ export function HorizontalFilterBar({
                   confidences: toggleInArray(filters.confidences, c.value),
                 })
               }
-              className={`text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+              className={`text-[0.6875rem] font-600 px-2.5 py-1 rounded-full border transition-all duration-[var(--duration-fast)] ${
                 filters.confidences.includes(c.value) ? c.activeClass : INACTIVE_CHIP
               }`}
             >
@@ -128,8 +126,7 @@ export function HorizontalFilterBar({
           ))}
         </div>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-700" />
+        <div className="w-px h-6 bg-border" />
 
         {/* Tier chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -142,7 +139,7 @@ export function HorizontalFilterBar({
                   tiers: toggleInArray(filters.tiers, t.value),
                 })
               }
-              className={`text-xs font-semibold w-7 h-7 rounded-full border transition-colors ${
+              className={`text-[0.6875rem] font-700 w-7 h-7 rounded-full border transition-all duration-[var(--duration-fast)] ${
                 filters.tiers.includes(t.value) ? t.activeClass : INACTIVE_CHIP
               }`}
             >
@@ -153,35 +150,33 @@ export function HorizontalFilterBar({
 
         {/* Right side: sort toggle + clear */}
         <div className="flex items-center gap-3 ml-auto">
-          {/* Sort toggle */}
-          <div className="flex bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+          <div className="flex bg-secondary rounded-[var(--radius-md)] border border-border overflow-hidden">
             <button
               onClick={() => onSortChange('recent')}
-              className={`text-xs font-medium px-3 py-1.5 transition-colors ${
+              className={`text-[0.6875rem] font-600 tracking-[0.04em] uppercase px-3 py-1.5 transition-all duration-[var(--duration-fast)] ${
                 sortMode === 'recent'
-                  ? 'bg-gray-700 text-white'
-                  : 'text-gray-400 hover:text-gray-300'
+                  ? 'bg-primary/15 text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Recent
             </button>
             <button
               onClick={() => onSortChange('hottest')}
-              className={`text-xs font-medium px-3 py-1.5 transition-colors ${
+              className={`text-[0.6875rem] font-600 tracking-[0.04em] uppercase px-3 py-1.5 transition-all duration-[var(--duration-fast)] ${
                 sortMode === 'hottest'
-                  ? 'bg-gray-700 text-white'
-                  : 'text-gray-400 hover:text-gray-300'
+                  ? 'bg-primary/15 text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Hottest
             </button>
           </div>
 
-          {/* Clear all */}
           {hasFilters && (
             <button
               onClick={clearAll}
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-[var(--duration-fast)]"
             >
               Clear all
             </button>

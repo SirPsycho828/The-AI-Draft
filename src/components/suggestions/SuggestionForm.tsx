@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { addSuggestion } from '../../services/firestore';
 
+const inputClass = 'w-full bg-secondary border border-border rounded-[var(--radius-md)] px-4 py-2 text-foreground focus:border-primary/40 focus:outline-none transition-colors duration-[var(--duration-fast)] placeholder-muted-foreground/60';
+const labelClass = 'block text-[0.8125rem] font-600 text-card-foreground mb-1';
+
 export function SuggestionForm() {
   const { user } = useAuth();
   const [personName, setPersonName] = useState('');
@@ -29,9 +32,9 @@ export function SuggestionForm() {
 
   if (submitted) {
     return (
-      <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 text-center">
-        <p className="text-green-400 font-medium">Suggestion submitted!</p>
-        <p className="text-sm text-gray-400 mt-1">It will appear in the suggestions list for others to upvote.</p>
+      <div className="bg-success/10 border border-success/20 rounded-[var(--radius-lg)] p-6 text-center">
+        <p className="text-success font-600">Suggestion submitted!</p>
+        <p className="text-sm text-card-foreground mt-1">It will appear in the suggestions list for others to upvote.</p>
         <button
           onClick={() => {
             setSubmitted(false);
@@ -40,7 +43,7 @@ export function SuggestionForm() {
             setXHandle('');
             setReason('');
           }}
-          className="mt-4 text-sm text-blue-400 hover:text-blue-300"
+          className="mt-4 text-sm text-primary hover:brightness-110 font-600 transition-all duration-[var(--duration-fast)]"
         >
           Submit another
         </button>
@@ -51,51 +54,25 @@ export function SuggestionForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">Person Name *</label>
-        <input
-          type="text"
-          value={personName}
-          onChange={(e) => setPersonName(e.target.value)}
-          required
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-          placeholder="e.g. Andrej Karpathy"
-        />
+        <label className={labelClass}>Person Name *</label>
+        <input type="text" value={personName} onChange={(e) => setPersonName(e.target.value)} required className={inputClass} placeholder="e.g. Andrej Karpathy" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">LinkedIn URL</label>
-        <input
-          type="url"
-          value={linkedinUrl}
-          onChange={(e) => setLinkedinUrl(e.target.value)}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-          placeholder="https://linkedin.com/in/..."
-        />
+        <label className={labelClass}>LinkedIn URL</label>
+        <input type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} className={inputClass} placeholder="https://linkedin.com/in/..." />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">X Handle</label>
-        <input
-          type="text"
-          value={xHandle}
-          onChange={(e) => setXHandle(e.target.value)}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-          placeholder="@handle"
-        />
+        <label className={labelClass}>X Handle</label>
+        <input type="text" value={xHandle} onChange={(e) => setXHandle(e.target.value)} className={inputClass} placeholder="@handle" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1">Why should we track this person? *</label>
-        <textarea
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          required
-          rows={3}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:outline-none resize-none"
-          placeholder="e.g. Lead researcher at xAI, formerly at DeepMind"
-        />
+        <label className={labelClass}>Why should we track this person? *</label>
+        <textarea value={reason} onChange={(e) => setReason(e.target.value)} required rows={3} className={`${inputClass} resize-none`} placeholder="e.g. Lead researcher at xAI, formerly at DeepMind" />
       </div>
       <button
         type="submit"
         disabled={submitting}
-        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+        className="bg-primary text-primary-foreground disabled:opacity-50 px-6 py-2 rounded-[var(--radius-md)] font-700 tracking-[0.06em] uppercase text-[0.8125rem] hover:brightness-110 transition-all duration-[var(--duration-fast)]"
       >
         {submitting ? 'Submitting...' : 'Submit Suggestion'}
       </button>

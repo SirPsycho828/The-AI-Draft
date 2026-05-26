@@ -12,7 +12,7 @@ export default function AdminCollectors() {
   const [runningFree, setRunningFree] = useState(false);
   const [allResult, setAllResult] = useState<string | null>(null);
 
-  if (loading) return <p className="text-gray-500">Loading...</p>;
+  if (loading) return <p className="text-muted-foreground">Loading...</p>;
 
   const collectors = config?.collectors ?? {};
 
@@ -45,31 +45,33 @@ export default function AdminCollectors() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold">Collector Status</h1>
+        <h1 className="font-heading text-2xl tracking-[0.03em] text-foreground">COLLECTOR STATUS</h1>
         <div className="flex gap-2">
           <button
             onClick={handleRunFree}
             disabled={runningFree || runningAll}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white text-sm transition-colors"
+            className="px-4 py-2 rounded-[var(--radius-md)] bg-primary text-primary-foreground hover:brightness-110 disabled:opacity-50 text-[0.8125rem] font-700 tracking-[0.06em] uppercase transition-all duration-[var(--duration-fast)]"
           >
             {runningFree ? 'Running...' : 'Run Free'}
           </button>
           <button
             onClick={handleRunAll}
             disabled={runningAll || runningFree}
-            className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:bg-gray-700 disabled:text-gray-500 text-white text-sm transition-colors"
+            className="px-4 py-2 rounded-[var(--radius-md)] bg-accent text-accent-foreground hover:brightness-110 disabled:opacity-50 text-[0.8125rem] font-700 tracking-[0.06em] uppercase transition-all duration-[var(--duration-fast)]"
           >
             {runningAll ? 'Running...' : 'Run All (incl. paid)'}
           </button>
         </div>
       </div>
       {allResult && (
-        <p className={`mb-4 text-sm ${allResult.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
+        <p className={`mb-4 text-sm ${allResult.startsWith('Error') ? 'text-destructive' : 'text-success'}`}>
           {allResult}
         </p>
       )}
       {Object.keys(collectors).length === 0 ? (
-        <p className="text-gray-500">No collectors configured yet. They'll appear here once Cloud Functions are deployed.</p>
+        <div className="bg-card border border-border rounded-[var(--radius-lg)] p-8 text-center">
+          <p className="text-muted-foreground">No collectors configured yet. They'll appear here once Cloud Functions are deployed.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(collectors).map(([name, cfg]) => (

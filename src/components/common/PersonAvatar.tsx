@@ -1,17 +1,17 @@
 import type { Tier } from '../../types';
 
 const TIER_RING: Record<Tier, string> = {
-  legendary: 'ring-amber-500/60',
-  senior: 'ring-blue-500/60',
-  notable: 'ring-gray-500/60',
-  emerging: 'ring-green-500/60',
+  legendary: 'ring-tier-legendary/60',
+  senior: 'ring-tier-senior/60',
+  notable: 'ring-tier-notable/60',
+  emerging: 'ring-tier-emerging/60',
 };
 
 const TIER_BG: Record<Tier, string> = {
-  legendary: 'bg-amber-500/20 text-amber-400',
-  senior: 'bg-blue-500/20 text-blue-400',
-  notable: 'bg-gray-500/20 text-gray-300',
-  emerging: 'bg-green-500/20 text-green-400',
+  legendary: 'bg-tier-legendary/20 text-tier-legendary',
+  senior: 'bg-tier-senior/20 text-tier-senior',
+  notable: 'bg-tier-notable/20 text-tier-notable',
+  emerging: 'bg-tier-emerging/20 text-tier-emerging',
 };
 
 interface PersonAvatarProps {

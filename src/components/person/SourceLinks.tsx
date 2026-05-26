@@ -20,7 +20,7 @@ export function SourceLinks({ sources }: { sources: PersonSources }) {
           href={`${l.urlPrefix}${sources[l.key]}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-lg text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
+          className="text-[0.8125rem] font-500 bg-secondary border border-border px-3 py-1.5 rounded-[var(--radius-md)] text-card-foreground hover:text-primary hover:border-primary/30 transition-all duration-[var(--duration-fast)]"
         >
           {l.label}
         </a>
