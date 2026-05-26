@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.githubBiosCollector = void 0;
+exports.runGithubBios = runGithubBios;
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const firestore_1 = require("firebase-admin/firestore");
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -20,7 +21,7 @@ async function fetchGitHubUser(username) {
         return null;
     return res.json();
 }
-exports.githubBiosCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 12 hours', timeoutSeconds: 540 }, async () => {
+async function runGithubBios() {
     try {
         const people = await (0, collector_base_1.getPeopleWithSource)('githubUsername');
         for (const person of people) {
@@ -60,5 +61,6 @@ exports.githubBiosCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 12 
         console.error('GitHub bios collector error:', error);
         await (0, collector_base_1.updateCollectorStatus)(SOURCE, 'error');
     }
-});
+}
+exports.githubBiosCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 12 hours', timeoutSeconds: 540 }, () => runGithubBios());
 //# sourceMappingURL=github-bios.js.map

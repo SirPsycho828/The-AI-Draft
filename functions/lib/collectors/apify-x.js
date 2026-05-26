@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apifyXCollector = void 0;
+exports.runX = runX;
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const firestore_1 = require("firebase-admin/firestore");
 const apify_client_1 = require("apify-client");
@@ -11,11 +12,10 @@ function db() {
     return (0, firestore_1.getFirestore)();
 }
 const apifyApiKey = (0, params_1.defineSecret)('APIFY_API_KEY');
-exports.apifyXCollector = (0, scheduler_1.onSchedule)({
-    schedule: 'every 12 hours',
-    timeoutSeconds: 540,
-    secrets: [apifyApiKey],
-}, async () => {
+/**
+ * Scrape X profiles for specific people (targeted) or all (full scan).
+ */
+async function runX(personIds) {
     try {
         const configSnap = await db().collection('config').doc('app').get();
         const config = configSnap.data();
@@ -24,10 +24,20 @@ exports.apifyXCollector = (0, scheduler_1.onSchedule)({
             console.warn('No X actor ID configured');
             return;
         }
-        const client = new apify_client_1.ApifyClient({ token: apifyApiKey.value() });
-        const people = await (0, collector_base_1.getPeopleWithSource)('xHandle', [
-            'legendary', 'senior',
-        ]);
+        const token = apifyApiKey.value();
+        const client = new apify_client_1.ApifyClient({ token });
+        let people;
+        if (personIds && personIds.length > 0) {
+            const allPeople = await (0, collector_base_1.getPeopleWithSource)('xHandle');
+            people = allPeople.filter((p) => personIds.includes(p.id));
+        }
+        else {
+            people = await (0, collector_base_1.getPeopleWithSource)('xHandle', [
+                'legendary', 'senior',
+            ]);
+        }
+        if (people.length === 0)
+            return;
         const handles = people.map((p) => p.sources.xHandle.replace('@', ''));
         const run = await client.actor(actorId).call({
             handles,
@@ -70,5 +80,11 @@ exports.apifyXCollector = (0, scheduler_1.onSchedule)({
         console.error('Apify X collector error:', error);
         await (0, collector_base_1.updateCollectorStatus)(SOURCE, 'error');
     }
-});
+}
+// Weekly full scan — runs every Sunday at 7 AM UTC (1h after LinkedIn)
+exports.apifyXCollector = (0, scheduler_1.onSchedule)({
+    schedule: 'every sunday 07:00',
+    timeoutSeconds: 540,
+    secrets: [apifyApiKey],
+}, () => runX());
 //# sourceMappingURL=apify-x.js.map

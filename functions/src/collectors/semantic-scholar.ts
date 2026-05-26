@@ -34,10 +34,8 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export const semanticScholarCollector = onSchedule(
-  { schedule: 'every 12 hours', timeoutSeconds: 540 },
-  async () => {
-    try {
+export async function runSemanticScholar() {
+  try {
       const people = await getPeopleWithSource('semanticScholarId');
 
       for (const person of people) {
@@ -90,5 +88,9 @@ export const semanticScholarCollector = onSchedule(
       console.error('Semantic Scholar collector error:', error);
       await updateCollectorStatus(SOURCE, 'error');
     }
-  }
+}
+
+export const semanticScholarCollector = onSchedule(
+  { schedule: 'every 12 hours', timeoutSeconds: 540 },
+  () => runSemanticScholar()
 );

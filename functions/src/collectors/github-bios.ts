@@ -32,10 +32,8 @@ async function fetchGitHubUser(username: string): Promise<GitHubUser | null> {
   return res.json() as Promise<GitHubUser>;
 }
 
-export const githubBiosCollector = onSchedule(
-  { schedule: 'every 12 hours', timeoutSeconds: 540 },
-  async () => {
-    try {
+export async function runGithubBios() {
+  try {
       const people = await getPeopleWithSource('githubUsername');
 
       for (const person of people) {
@@ -83,5 +81,9 @@ export const githubBiosCollector = onSchedule(
       console.error('GitHub bios collector error:', error);
       await updateCollectorStatus(SOURCE, 'error');
     }
-  }
+}
+
+export const githubBiosCollector = onSchedule(
+  { schedule: 'every 12 hours', timeoutSeconds: 540 },
+  () => runGithubBios()
 );

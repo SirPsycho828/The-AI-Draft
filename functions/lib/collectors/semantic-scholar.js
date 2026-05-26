@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.semanticScholarCollector = void 0;
+exports.runSemanticScholar = runSemanticScholar;
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const firestore_1 = require("firebase-admin/firestore");
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -20,7 +21,7 @@ async function fetchAuthor(authorId) {
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-exports.semanticScholarCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 12 hours', timeoutSeconds: 540 }, async () => {
+async function runSemanticScholar() {
     try {
         const people = await (0, collector_base_1.getPeopleWithSource)('semanticScholarId');
         for (const person of people) {
@@ -64,5 +65,6 @@ exports.semanticScholarCollector = (0, scheduler_1.onSchedule)({ schedule: 'ever
         console.error('Semantic Scholar collector error:', error);
         await (0, collector_base_1.updateCollectorStatus)(SOURCE, 'error');
     }
-});
+}
+exports.semanticScholarCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 12 hours', timeoutSeconds: 540 }, () => runSemanticScholar());
 //# sourceMappingURL=semantic-scholar.js.map

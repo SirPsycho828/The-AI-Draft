@@ -34,10 +34,8 @@ function isRelevant(item: NewsItem): boolean {
   return KEYWORDS.some((kw) => text.includes(kw));
 }
 
-export const newsRssCollector = onSchedule(
-  { schedule: 'every 6 hours', timeoutSeconds: 120 },
-  async () => {
-    try {
+export async function runNewsRss() {
+  try {
       const relevantItems: NewsItem[] = [];
 
       for (const feedUrl of RSS_FEEDS) {
@@ -73,5 +71,9 @@ export const newsRssCollector = onSchedule(
       console.error('News/RSS collector error:', error);
       await updateCollectorStatus(SOURCE, 'error');
     }
-  }
+}
+
+export const newsRssCollector = onSchedule(
+  { schedule: 'every 6 hours', timeoutSeconds: 120 },
+  () => runNewsRss()
 );

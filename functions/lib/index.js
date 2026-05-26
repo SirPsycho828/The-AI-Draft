@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setAdminRole = exports.newsRssCollector = exports.githubBiosCollector = exports.semanticScholarCollector = void 0;
+exports.runCollectorNow = exports.setAdminRole = exports.aiBrain = exports.apifyXCollector = exports.apifyLinkedinCollector = exports.newsRssCollector = exports.githubBiosCollector = exports.semanticScholarCollector = void 0;
 const app_1 = require("firebase-admin/app");
 (0, app_1.initializeApp)();
 var semantic_scholar_1 = require("./collectors/semantic-scholar");
@@ -9,11 +9,14 @@ var github_bios_1 = require("./collectors/github-bios");
 Object.defineProperty(exports, "githubBiosCollector", { enumerable: true, get: function () { return github_bios_1.githubBiosCollector; } });
 var news_rss_1 = require("./collectors/news-rss");
 Object.defineProperty(exports, "newsRssCollector", { enumerable: true, get: function () { return news_rss_1.newsRssCollector; } });
-// Requires secrets — deploy after running: firebase functions:secrets:set APIFY_API_KEY
-// export { apifyLinkedinCollector } from './collectors/apify-linkedin';
-// export { apifyXCollector } from './collectors/apify-x';
-// Requires secrets — deploy after running: firebase functions:secrets:set OPENROUTER_API_KEY
-// export { aiBrain } from './ai/brain';
+var apify_linkedin_1 = require("./collectors/apify-linkedin");
+Object.defineProperty(exports, "apifyLinkedinCollector", { enumerable: true, get: function () { return apify_linkedin_1.apifyLinkedinCollector; } });
+var apify_x_1 = require("./collectors/apify-x");
+Object.defineProperty(exports, "apifyXCollector", { enumerable: true, get: function () { return apify_x_1.apifyXCollector; } });
+var brain_1 = require("./ai/brain");
+Object.defineProperty(exports, "aiBrain", { enumerable: true, get: function () { return brain_1.aiBrain; } });
 var set_admin_1 = require("./admin/set-admin");
 Object.defineProperty(exports, "setAdminRole", { enumerable: true, get: function () { return set_admin_1.setAdminRole; } });
+var run_collector_1 = require("./admin/run-collector");
+Object.defineProperty(exports, "runCollectorNow", { enumerable: true, get: function () { return run_collector_1.runCollectorNow; } });
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apifyLinkedinCollector = void 0;
+exports.runLinkedin = runLinkedin;
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const firestore_1 = require("firebase-admin/firestore");
 const apify_client_1 = require("apify-client");
@@ -11,11 +12,11 @@ function db() {
     return (0, firestore_1.getFirestore)();
 }
 const apifyApiKey = (0, params_1.defineSecret)('APIFY_API_KEY');
-exports.apifyLinkedinCollector = (0, scheduler_1.onSchedule)({
-    schedule: 'every 48 hours',
-    timeoutSeconds: 540,
-    secrets: [apifyApiKey],
-}, async () => {
+/**
+ * Scrape LinkedIn profiles for specific people (targeted) or all (full scan).
+ * When personIds is provided, only those people are scraped (cost-efficient).
+ */
+async function runLinkedin(personIds) {
     try {
         const configSnap = await db().collection('config').doc('app').get();
         const config = configSnap.data();
@@ -24,10 +25,22 @@ exports.apifyLinkedinCollector = (0, scheduler_1.onSchedule)({
             console.warn('No LinkedIn actor ID configured');
             return;
         }
-        const client = new apify_client_1.ApifyClient({ token: apifyApiKey.value() });
-        const people = await (0, collector_base_1.getPeopleWithSource)('linkedinSlug', [
-            'legendary', 'senior', 'notable',
-        ]);
+        const token = apifyApiKey.value();
+        const client = new apify_client_1.ApifyClient({ token });
+        let people;
+        if (personIds && personIds.length > 0) {
+            // Targeted scrape — only specific people
+            const allPeople = await (0, collector_base_1.getPeopleWithSource)('linkedinSlug');
+            people = allPeople.filter((p) => personIds.includes(p.id));
+        }
+        else {
+            // Full scan — all people with LinkedIn slugs
+            people = await (0, collector_base_1.getPeopleWithSource)('linkedinSlug', [
+                'legendary', 'senior', 'notable',
+            ]);
+        }
+        if (people.length === 0)
+            return;
         const profileUrls = people.map((p) => `https://www.linkedin.com/in/${p.sources.linkedinSlug}`);
         const run = await client.actor(actorId).call({
             profileUrls,
@@ -73,5 +86,11 @@ exports.apifyLinkedinCollector = (0, scheduler_1.onSchedule)({
         console.error('Apify LinkedIn collector error:', error);
         await (0, collector_base_1.updateCollectorStatus)(SOURCE, 'error');
     }
-});
+}
+// Weekly full scan — runs every Sunday at 6 AM UTC
+exports.apifyLinkedinCollector = (0, scheduler_1.onSchedule)({
+    schedule: 'every sunday 06:00',
+    timeoutSeconds: 540,
+    secrets: [apifyApiKey],
+}, () => runLinkedin());
 //# sourceMappingURL=apify-linkedin.js.map

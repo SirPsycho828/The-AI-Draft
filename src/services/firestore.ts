@@ -18,7 +18,8 @@ import {
   type QueryConstraint,
   type Unsubscribe,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, db } from '../config/firebase';
 import type {
   Person,
   MoveEvent,
@@ -195,4 +196,14 @@ export async function getConfig(): Promise<AppConfig | null> {
 
 export async function updateConfig(data: Partial<AppConfig>): Promise<void> {
   await setDoc(CONFIG_DOC, data, { merge: true });
+}
+
+// --- Callable Functions ---
+
+const functions = getFunctions(app);
+
+export async function triggerCollector(collectorName: string): Promise<string> {
+  const fn = httpsCallable<{ collector: string }, { message: string }>(functions, 'runCollectorNow');
+  const result = await fn({ collector: collectorName });
+  return result.data.message;
 }

@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.newsRssCollector = void 0;
+exports.runNewsRss = runNewsRss;
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const firestore_1 = require("firebase-admin/firestore");
 const rss_parser_1 = __importDefault(require("rss-parser"));
@@ -26,7 +27,7 @@ function isRelevant(item) {
     const text = `${item.title} ${item.content ?? ''}`.toLowerCase();
     return KEYWORDS.some((kw) => text.includes(kw));
 }
-exports.newsRssCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 6 hours', timeoutSeconds: 120 }, async () => {
+async function runNewsRss() {
     try {
         const relevantItems = [];
         for (const feedUrl of RSS_FEEDS) {
@@ -62,5 +63,6 @@ exports.newsRssCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 6 hour
         console.error('News/RSS collector error:', error);
         await (0, collector_base_1.updateCollectorStatus)(SOURCE, 'error');
     }
-});
+}
+exports.newsRssCollector = (0, scheduler_1.onSchedule)({ schedule: 'every 6 hours', timeoutSeconds: 120 }, () => runNewsRss());
 //# sourceMappingURL=news-rss.js.map

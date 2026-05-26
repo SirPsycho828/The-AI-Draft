@@ -118,6 +118,7 @@ export interface AppConfig {
   openrouter: {
     activeModel: string;
     availableModels: OpenRouterModel[];
+    favoriteModelIds: string[];
     lastModelRefresh: Timestamp | null;
   };
   collectors: Record<string, CollectorConfig>;
