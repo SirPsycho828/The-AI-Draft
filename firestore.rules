@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // People: public read, admin write
+    match /people/{personId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // Raw changes: only functions write, admin can read
+      match /rawChanges/{changeId} {
+        allow read: if isAdmin();
+        allow write: if false; // only Cloud Functions
+      }
+    }
+
+    // Snapshots: admin read, functions write
+    match /snapshots/{snapshotId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Move events: public read published, admin write
+    match /moveEvents/{eventId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Suggestions: authenticated read, authenticated create, admin manage
+    match /suggestions/{suggestionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.submittedBy == request.auth.uid;
+      allow update: if isAdmin()
+        || (request.auth != null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes']));
+      allow delete: if isAdmin();
+    }
+
+    // Config: admin only
+    match /config/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.admin == true;
+    }
+  }
+}
