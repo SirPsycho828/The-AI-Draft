@@ -38,11 +38,9 @@ export async function runLinkedin(personIds?: string[]): Promise<void> {
 
     let people: PersonDoc[];
     if (personIds && personIds.length > 0) {
-      // Targeted scrape — only specific people
       const allPeople = await getPeopleWithSource('linkedinSlug');
       people = allPeople.filter((p) => personIds.includes(p.id));
     } else {
-      // Full scan — all people with LinkedIn slugs
       people = await getPeopleWithSource('linkedinSlug', [
         'legendary', 'senior', 'notable',
       ]);
@@ -50,36 +48,75 @@ export async function runLinkedin(personIds?: string[]): Promise<void> {
 
     if (people.length === 0) return;
 
-    const profileUrls = people.map(
+    const queries = people.map(
       (p) => `https://www.linkedin.com/in/${p.sources.linkedinSlug}`
     );
 
     const run = await client.actor(actorId).call({
-      profileUrls,
-      maxItems: profileUrls.length,
+      profileScraperMode: 'Profile details no email ($4 per 1k)',
+      queries,
     });
 
     const { items } = await client.dataset(run.defaultDatasetId).listItems();
+    console.log(`LinkedIn scraper returned ${items.length} results`);
+
+    // Build lookup map for flexible slug matching
+    const slugMap = new Map<string, PersonDoc>();
+    for (const p of people) {
+      slugMap.set(p.sources.linkedinSlug!.toLowerCase(), p);
+    }
 
     for (const item of items) {
-      const linkedinSlug = (item.profileUrl as string)
-        ?.split('/in/')?.[1]
-        ?.replace(/\/$/, '');
-      const person = people.find((p) => p.sources.linkedinSlug === linkedinSlug);
-      if (!person) continue;
+      if (item.status === 403 || item.error) {
+        console.warn(`LinkedIn: error for ${item.publicIdentifier}: ${item.error}`);
+        continue;
+      }
+
+      const identifier = (item.publicIdentifier as string)?.toLowerCase();
+      if (!identifier) continue;
+
+      // Try exact match, then prefix match (LinkedIn normalizes slugs,
+      // e.g. "yann-lecun-0b999" → publicIdentifier "yann-lecun")
+      let person = slugMap.get(identifier);
+      if (!person) {
+        for (const [slug, p] of slugMap) {
+          if (slug.startsWith(identifier) || identifier.startsWith(slug)) {
+            person = p;
+            break;
+          }
+        }
+      }
+      if (!person) {
+        console.warn(`LinkedIn: no person match for slug "${identifier}"`);
+        continue;
+      }
+
+      // Extract current position
+      const positions = item.currentPosition as Array<{ companyName?: string }> | undefined;
+      const currentCompany = positions?.[0]?.companyName ?? null;
+
+      // Extract location text
+      const locationObj = item.location as { linkedinText?: string } | undefined;
+      const location = locationObj?.linkedinText ?? null;
 
       const currentData = {
-        headline: item.headline,
-        company: item.company,
-        title: item.title,
-        location: item.location,
-        profilePicture: item.profilePicture ?? item.profileImageUrl ?? null,
+        firstName: item.firstName ?? null,
+        lastName: item.lastName ?? null,
+        headline: item.headline ?? null,
+        about: item.about ?? null,
+        company: currentCompany,
+        location,
+        openToWork: item.openToWork ?? false,
+        followerCount: item.followerCount ?? null,
+        connectionsCount: item.connectionsCount ?? null,
+        photo: item.photo ?? null,
       };
 
-      // Update photoUrl whenever Apify returns a profile picture
-      const photoUrl = currentData.profilePicture;
-      if (photoUrl && typeof photoUrl === 'string') {
-        await db().collection('people').doc(person.id).update({ photoUrl });
+      // Update photoUrl from LinkedIn profile picture
+      if (currentData.photo && typeof currentData.photo === 'string') {
+        await db().collection('people').doc(person.id).update({
+          photoUrl: currentData.photo,
+        });
       }
 
       await saveSnapshot({
@@ -94,7 +131,7 @@ export async function runLinkedin(personIds?: string[]): Promise<void> {
         const changes = detectChanges(
           previous.data as Record<string, unknown>,
           currentData as Record<string, unknown>,
-          ['company', 'title', 'headline']
+          ['company', 'headline', 'location', 'openToWork']
         );
 
         if (changes.length > 0) {
