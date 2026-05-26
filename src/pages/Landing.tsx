@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Zap, ArrowRight } from 'lucide-react';
-import { useLandingMoves } from '../hooks/useLandingMoves';
+import { Zap, ArrowRight, User } from 'lucide-react';
+import { useLandingMoves, type HeroMove } from '../hooks/useLandingMoves';
 
 const stats = [
   { value: '50+', label: 'COMPANIES TRACKED' },
@@ -30,6 +30,40 @@ const pipeline = [
     description: 'Verified moves hit the draft board in real-time with AI-generated summaries explaining who moved and why it matters.',
   },
 ];
+
+/* ─── Hero move card — shows a real recent move ─── */
+function HeroMoveCard({ move, index }: { move: HeroMove; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.6 + index * 0.12, ease: [0.34, 1.56, 0.64, 1] }}
+      className="flex items-center gap-3 bg-card/80 backdrop-blur-sm border border-border rounded-[var(--radius-lg)] px-4 py-3"
+    >
+      {move.photoUrl ? (
+        <img
+          src={move.photoUrl}
+          alt=""
+          className="w-9 h-9 rounded-full object-cover shrink-0 border border-border"
+        />
+      ) : (
+        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border">
+          <User size={14} className="text-muted-foreground" />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${move.dotColor}`} />
+          <span className={`font-body text-[0.625rem] font-700 tracking-[0.08em] uppercase ${move.typeColor}`}>
+            {move.typeLabel}
+          </span>
+        </div>
+        <p className="font-body text-sm text-foreground font-600 truncate">{move.personName}</p>
+        <p className="font-body text-xs text-muted-foreground truncate">{move.description}</p>
+      </div>
+    </motion.div>
+  );
+}
 
 /* ─── Animated counter component ─── */
 function AnimatedStat({ value, label }: { value: string; label: string }) {
@@ -104,102 +138,109 @@ function SourceMarquee() {
 export default function Landing() {
   const pipelineRef = useRef(null);
   const pipelineInView = useInView(pipelineRef, { once: true, amount: 0.2 });
-  const tickerMoves = useLandingMoves();
+  const { tickerMoves, heroMoves } = useLandingMoves();
 
   return (
     <div className="overflow-hidden relative">
-      {/* ═══ ANIMATED BACKGROUND — drifting gradient blobs ═══ */}
+      {/* ═══ BACKGROUND — dot grid + soft gradients ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Dot grid texture */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.035]"
           style={{
             backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
         />
-
-        {/* Drifting gradient orbs — pure CSS, always moving */}
         <div
-          className="absolute w-[800px] h-[600px] top-[-10%] right-[-10%] rounded-full opacity-100"
+          className="absolute w-[900px] h-[700px] top-[-15%] right-[-15%] rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(200, 243, 29, 0.07) 0%, rgba(200, 243, 29, 0.02) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(200, 243, 29, 0.06) 0%, rgba(200, 243, 29, 0.015) 40%, transparent 70%)',
             animation: 'drift-1 20s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute w-[600px] h-[500px] bottom-[10%] left-[-8%] rounded-full"
+          className="absolute w-[700px] h-[600px] bottom-[5%] left-[-10%] rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, rgba(59, 130, 246, 0.015) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 60%)',
             animation: 'drift-2 25s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute w-[500px] h-[400px] top-[40%] right-[5%] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 40%, transparent 70%)',
-            animation: 'drift-3 22s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute w-[700px] h-[500px] top-[60%] left-[20%] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(200, 243, 29, 0.05) 0%, rgba(200, 243, 29, 0.01) 40%, transparent 70%)',
-            animation: 'drift-4 28s ease-in-out infinite',
           }}
         />
       </div>
 
-      {/* ═══ HERO ═══ */}
-      <section className="min-h-[85vh] flex flex-col justify-center px-4 sm:px-8 max-w-[1400px] mx-auto relative">
-        <div className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-          >
-            {/* Breaking badge */}
-            <div className="flex items-center gap-2 mb-6">
-              <span className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary text-[0.6875rem] font-700 tracking-[0.08em] uppercase px-3 py-1 rounded-[var(--radius-sm)]">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse-glow" />
-                LIVE
-              </span>
-            </div>
-
-            {/* Massive headline */}
-            <h1 className="font-heading text-[clamp(3.5rem,12vw,9rem)] leading-[0.9] tracking-[0.02em] uppercase">
-              <span className="text-foreground">WHO'S </span>
-              <span className="text-primary">MOVING</span>
-              <br />
-              <span className="text-foreground">IN AI</span>
-              <span className="text-primary">?</span>
-            </h1>
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="mt-6 text-muted-foreground font-body text-[0.9375rem] max-w-lg leading-relaxed"
-          >
-            Real-time career intelligence across the AI industry. Know who's leaving,
-            who's joining, and who's starting something new — before everyone else.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            className="mt-8"
-          >
-            <Link
-              to="/dashboard"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-700 text-[0.8125rem] tracking-[0.08em] uppercase px-6 py-3 rounded-[var(--radius-md)] hover:brightness-110 transition-all duration-[var(--duration-fast)] group"
+      {/* ═══ HERO — two-column with live move cards ═══ */}
+      <section className="min-h-[85vh] flex items-center px-4 sm:px-8 max-w-[1400px] mx-auto relative">
+        <div className="relative z-10 w-full flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-16 py-16">
+          {/* Left — headline + CTA */}
+          <div className="flex-1 min-w-0">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
             >
-              VIEW THE DRAFT BOARD
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary text-[0.6875rem] font-700 tracking-[0.08em] uppercase px-3 py-1 rounded-[var(--radius-sm)]">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse-glow" />
+                  LIVE
+                </span>
+              </div>
+
+              <h1 className="font-heading text-[clamp(3.5rem,10vw,8rem)] leading-[0.9] tracking-[0.02em] uppercase">
+                <span className="text-foreground">WHO'S </span>
+                <span className="text-primary">MOVING</span>
+                <br />
+                <span className="text-foreground">IN AI</span>
+                <span className="text-primary">?</span>
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="mt-6 text-muted-foreground font-body text-[0.9375rem] max-w-lg leading-relaxed"
+            >
+              Real-time career intelligence across the AI industry. Know who's leaving,
+              who's joining, and who's starting something new — before everyone else.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              className="mt-8"
+            >
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-700 text-[0.8125rem] tracking-[0.08em] uppercase px-6 py-3 rounded-[var(--radius-md)] hover:brightness-110 transition-all duration-[var(--duration-fast)] group"
+              >
+                VIEW THE DRAFT BOARD
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Right — live move card preview */}
+          {heroMoves.length > 0 && (
+            <div className="w-full lg:w-[380px] shrink-0 space-y-3">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+                className="flex items-center gap-2 mb-2"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+                <span className="text-[0.625rem] font-700 tracking-[0.1em] uppercase text-muted-foreground">
+                  LATEST MOVES
+                </span>
+              </motion.div>
+              {heroMoves.map((move, i) => (
+                <HeroMoveCard key={i} move={move} index={i} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -226,12 +267,12 @@ export default function Landing() {
       {/* ═══ SOURCE MARQUEE ═══ */}
       <SourceMarquee />
 
-      {/* ═══ PIPELINE (replaces "How it Works") ═══ */}
+      {/* ═══ PIPELINE ═══ */}
       <section
         ref={pipelineRef}
-        className="relative py-20 sm:py-32 px-4 sm:px-8 max-w-[1400px] mx-auto"
+        className="relative py-20 sm:py-28 px-4 sm:px-8 max-w-[1400px] mx-auto"
       >
-        <div className="space-y-20 sm:space-y-28">
+        <div className="space-y-16 sm:space-y-24">
           {pipeline.map((step, i) => (
             <motion.div
               key={step.word}
@@ -256,7 +297,7 @@ export default function Landing() {
       <TickerMarquee moves={tickerMoves} />
 
       {/* ═══ CLOSING CTA ═══ */}
-      <section className="relative py-24 sm:py-36 px-4 sm:px-8 max-w-[1400px] mx-auto text-center">
+      <section className="relative py-24 sm:py-32 px-4 sm:px-8 max-w-[1400px] mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
