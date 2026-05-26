@@ -140,6 +140,9 @@ export default function Dashboard() {
       {/* Command Stats Bar — full width */}
       <CommandStatsBar events={events} totalPeople={people.length} />
 
+      {/* Live Ticker Bar — full width, right under stats */}
+      <LiveTickerBar events={events} people={peopleMap} />
+
       <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 flex flex-col flex-1 min-h-0 w-full">
         <HorizontalFilterBar
           filters={filters}
@@ -148,11 +151,6 @@ export default function Dashboard() {
           onSortChange={setSortMode}
           companies={companies}
         />
-
-        {/* Live Ticker Bar */}
-        <div className="mt-4 -mx-4 sm:-mx-8">
-          <LiveTickerBar events={events} people={peopleMap} />
-        </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mt-6 flex-1 min-h-0">
           {/* Feed column */}

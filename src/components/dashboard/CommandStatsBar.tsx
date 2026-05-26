@@ -129,30 +129,32 @@ export function CommandStatsBar({ events, totalPeople }: CommandStatsBarProps) {
         </span>
       </div>
 
-      <div className="w-px h-4 bg-border shrink-0" />
-
-      {/* Move type breakdown bars */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">
-          types
-        </span>
-        <div className="flex h-3 w-24 rounded-[var(--radius-sm)] overflow-hidden bg-secondary">
-          {stats.weekTotal > 0 &&
-            (Object.entries(MOVE_TYPE_COLORS) as [MoveType, string][]).map(([type, colorClass]) => {
-              const count = stats.typeCounts.get(type) ?? 0;
-              if (count === 0) return null;
-              const pct = (count / stats.weekTotal) * 100;
-              return (
-                <div
-                  key={type}
-                  className={`${colorClass} transition-all duration-500`}
-                  style={{ width: `${pct}%` }}
-                  title={`${type.replace('_', ' ')}: ${count}`}
-                />
-              );
-            })}
-        </div>
-      </div>
+      {/* Move type breakdown bars — only show when there's data */}
+      {stats.weekTotal > 0 && (
+        <>
+          <div className="w-px h-4 bg-border shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[0.625rem] font-600 tracking-[0.06em] uppercase text-muted-foreground">
+              types
+            </span>
+            <div className="flex h-3 w-24 rounded-[var(--radius-sm)] overflow-hidden bg-secondary">
+              {(Object.entries(MOVE_TYPE_COLORS) as [MoveType, string][]).map(([type, colorClass]) => {
+                const count = stats.typeCounts.get(type) ?? 0;
+                if (count === 0) return null;
+                const pct = (count / stats.weekTotal) * 100;
+                return (
+                  <div
+                    key={type}
+                    className={`${colorClass} transition-all duration-500`}
+                    style={{ width: `${pct}%` }}
+                    title={`${type.replace('_', ' ')}: ${count}`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="w-px h-4 bg-border shrink-0" />
 
