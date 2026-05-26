@@ -1,10 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import type { MoveEvent, MoveType, Person } from '../../types';
+import type { MoveEvent, MoveType } from '../../types';
 
 interface CommandStatsBarProps {
   events: MoveEvent[];
-  people: Map<string, Person>;
   totalPeople: number;
 }
 
@@ -31,7 +30,7 @@ const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   role_change: 'bg-move-role-change',
 };
 
-export function CommandStatsBar({ events, people, totalPeople }: CommandStatsBarProps) {
+export function CommandStatsBar({ events, totalPeople }: CommandStatsBarProps) {
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [lastEventTime, setLastEventTime] = useState<number>(Date.now());
 

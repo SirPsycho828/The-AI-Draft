@@ -138,7 +138,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-64px)]">
       {/* Command Stats Bar — full width */}
-      <CommandStatsBar events={events} people={peopleMap} totalPeople={people.length} />
+      <CommandStatsBar events={events} totalPeople={people.length} />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 flex flex-col flex-1 min-h-0 w-full">
         <HorizontalFilterBar
