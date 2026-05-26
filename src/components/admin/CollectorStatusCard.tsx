@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { CollectorConfig } from '../../types';
 import { triggerCollector } from '../../services/firestore';
 
-const TRIGGERABLE = ['semantic_scholar', 'github', 'news', 'linkedin', 'x'];
+const TRIGGERABLE = ['semantic_scholar', 'github', 'news', 'linkedin', 'x', 'arxiv', 'company_site'];
 const PAID = ['linkedin', 'x'];
 
 interface Props {

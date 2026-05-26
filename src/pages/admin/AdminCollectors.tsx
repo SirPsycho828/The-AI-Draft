@@ -3,8 +3,8 @@ import { useConfig } from '../../hooks/useConfig';
 import { CollectorStatusCard } from '../../components/admin/CollectorStatusCard';
 import { triggerCollector } from '../../services/firestore';
 
-const FREE_TRIGGERABLE = ['semantic_scholar', 'github', 'news'];
-const ALL_TRIGGERABLE = ['semantic_scholar', 'github', 'news', 'linkedin', 'x'];
+const FREE_TRIGGERABLE = ['semantic_scholar', 'github', 'news', 'arxiv', 'company_site'];
+const ALL_TRIGGERABLE = ['semantic_scholar', 'github', 'news', 'linkedin', 'x', 'arxiv', 'company_site'];
 
 export default function AdminCollectors() {
   const { config, loading } = useConfig();
