@@ -7,6 +7,7 @@ function db() {
   return getFirestore();
 }
 const openrouterApiKey = defineSecret('OPENROUTER_API_KEY');
+const apifyApiKey = defineSecret('APIFY_API_KEY');
 
 interface BrainResponse {
   isRealMove: boolean;
@@ -20,7 +21,7 @@ interface BrainResponse {
 export const aiBrain = onDocumentCreated(
   {
     document: 'people/{personId}/rawChanges/{changeId}',
-    secrets: [openrouterApiKey],
+    secrets: [openrouterApiKey, apifyApiKey],
   },
   async (event) => {
     const snap = event.data;
@@ -141,6 +142,31 @@ Respond with ONLY valid JSON (no markdown):
             }
           }
           await db().collection('people').doc(personId).update(updates);
+        }
+      }
+
+      // When a real move is detected from free sources, trigger targeted
+      // LinkedIn/X scrapes to corroborate the signal (hybrid strategy).
+      if (result.isRealMove) {
+        const freeSourceSignal = signals.some((s) =>
+          ['semantic_scholar', 'github', 'news'].includes(s.source)
+        );
+        if (freeSourceSignal) {
+          const hasLinkedin = person.sources?.linkedinSlug;
+          const hasX = person.sources?.xHandle;
+          if (hasLinkedin || hasX) {
+            console.log(`Triggering targeted paid scrapes for ${person.name} (${personId})`);
+            try {
+              const { runLinkedin } = await import('../collectors/apify-linkedin');
+              const { runX } = await import('../collectors/apify-x');
+              const tasks: Promise<void>[] = [];
+              if (hasLinkedin) tasks.push(runLinkedin([personId]));
+              if (hasX) tasks.push(runX([personId]));
+              await Promise.allSettled(tasks);
+            } catch (scrapeErr) {
+              console.warn('Targeted scrape failed (non-fatal):', scrapeErr);
+            }
+          }
         }
       }
 
