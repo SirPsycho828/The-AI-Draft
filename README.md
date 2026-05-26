@@ -2,23 +2,72 @@
 
 # The AI Draft
 
-**Real-time career move intelligence across the AI industry.**
+**The sports draft ticker for the AI talent wars.**
 
-![React](https://img.shields.io/badge/React_19-20232A?style=flat&logo=react&logoColor=61DAFB)
+Track career moves of top AI researchers and leaders in real time — departures, new hires, startup launches, and more — powered by automated data collection and AI-driven analysis.
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-theaidraft.com-C8F31D?style=for-the-badge)](https://theaidraft.com)
+
+![React 19](https://img.shields.io/badge/React_19-20232A?style=flat&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
 
 </div>
 
 ---
 
-## Overview
+## What This Is
 
-The AI Draft tracks career moves of top AI researchers and leaders across the industry — departures, new hires, startup launches, and more. It collects signals from 7 data sources, runs them through an AI brain that filters noise and classifies moves, then surfaces verified events on a real-time dashboard with confidence scores and AI-generated summaries.
+The AI industry moves fast. Key researchers leave Google DeepMind, stealth startups poach entire teams from OpenAI, and new labs emerge overnight. This project tracks all of it automatically.
 
-Think of it as the sports draft ticker for the AI talent wars.
+Seven data collectors continuously monitor LinkedIn, GitHub, Semantic Scholar, X/Twitter, arXiv, news feeds, and company team pages. When a collector detects a change — a new affiliation, a bio update, a press mention — it writes a raw signal to Firestore. An AI brain (triggered via Firestore `onCreate`) correlates signals across sources, filters noise, classifies the move type, and assigns a confidence level. Verified moves surface on a real-time dashboard.
+
+## How It Works
+
+```
+                         ┌─────────────────────────┐
+                         │     DATA COLLECTORS      │
+                         │                          │
+                         │  LinkedIn ──┐            │
+                         │  GitHub ────┤            │
+                         │  Semantic   │  Raw       │
+                         │  Scholar ───┤  Signals   │
+                         │  X/Twitter ─┤     │      │
+                         │  arXiv ─────┤     │      │
+                         │  News/RSS ──┤     │      │
+                         │  Company ───┘     │      │
+                         │    Sites          ▼      │
+                         └──────────── Firestore ───┘
+                                         │
+                                    onCreate
+                                         │
+                              ┌──────────▼──────────┐
+                              │      AI BRAIN       │
+                              │                     │
+                              │  Cross-reference    │
+                              │  signals, filter    │
+                              │  noise, classify    │
+                              │  move type, assign  │
+                              │  confidence, write  │
+                              │  summary            │
+                              └──────────┬──────────┘
+                                         │
+                                    MoveEvent
+                                         │
+                              ┌──────────▼──────────┐
+                              │  ADMIN REVIEW QUEUE  │
+                              │  Publish / Dismiss   │
+                              └──────────┬──────────┘
+                                         │
+                              ┌──────────▼──────────┐
+                              │   LIVE DASHBOARD     │
+                              │   Real-time feed     │
+                              │   via Firestore      │
+                              │   subscriptions      │
+                              └─────────────────────┘
+```
 
 ## Features
 
@@ -27,13 +76,13 @@ Think of it as the sports draft ticker for the AI talent wars.
 <td width="50%">
 
 **Real-Time Dashboard**
-Live feed of AI talent moves with filtering by move type, confidence level, and company. Includes stats bar and skeleton loading states.
+Live feed of AI career moves with filtering by move type, confidence level, and time window. Firestore `onSnapshot` subscriptions — no polling.
 
 </td>
 <td width="50%">
 
-**AI-Powered Analysis**
-An AI Brain correlates signals across sources, filters noise, and determines confidence levels — producing human-readable summaries of each move.
+**AI-Powered Classification**
+An event-driven AI brain correlates signals across sources, determines move type (departure, hire, startup founded, etc.), and generates human-readable summaries with confidence scoring.
 
 </td>
 </tr>
@@ -41,13 +90,13 @@ An AI Brain correlates signals across sources, filters noise, and determines con
 <td width="50%">
 
 **7 Automated Collectors**
-Semantic Scholar, GitHub bios, LinkedIn (Apify), X/Twitter (Apify), News/RSS feeds, plus extensible patterns for company sites and arXiv.
+Each collector follows a snapshot/diff pattern — store current state, compare against previous, emit raw signals on change. Built on a shared `CollectorBase` utility.
 
 </td>
 <td width="50%">
 
 **Admin Review Queue**
-Pending moves go through human review before publishing. Admins can edit AI summaries, publish, or dismiss with full signal transparency.
+Pending moves go through human review before publishing. Admins can edit AI summaries, adjust confidence, publish, or dismiss — with full signal transparency.
 
 </td>
 </tr>
@@ -55,7 +104,7 @@ Pending moves go through human review before publishing. Admins can edit AI summ
 <td width="50%">
 
 **Person Profiles**
-Individual pages with source links, tier badges, and a vertical timeline of all detected career moves with expandable signal details.
+Individual pages with source links, tier badges (legendary/senior/notable/emerging), and a vertical timeline of all detected career moves with expandable signal details.
 
 </td>
 <td width="50%">
@@ -69,52 +118,78 @@ Authenticated users can suggest people to track and upvote existing suggestions.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Vite |
-| Styling | Tailwind CSS v4 |
-| Backend | Firebase Cloud Functions v2 (Node 22) |
-| Database | Cloud Firestore (real-time subscriptions) |
-| Auth | Firebase Auth (Google sign-in) |
-| AI | OpenRouter API (model-agnostic) |
-| Scraping | Apify (LinkedIn, X) |
-| APIs | Semantic Scholar, GitHub, arXiv |
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| Frontend | React 19, TypeScript, Vite | Type-safe SPA with fast HMR |
+| Styling | Tailwind CSS v4 | Utility-first with `@theme` design tokens |
+| Animation | Framer Motion | Staggered list animations, `AnimatePresence` for expand/collapse |
+| Backend | Firebase Cloud Functions v2 (Node 22) | Event-driven triggers, scheduled collectors |
+| Database | Cloud Firestore | Real-time subscriptions, document-level security rules |
+| Auth | Firebase Auth (Google OAuth) | Custom claims for admin role |
+| AI | OpenRouter API | Model-agnostic — swap models via admin settings |
+| Scraping | Apify | Managed actors for LinkedIn and X/Twitter |
+| APIs | Semantic Scholar, GitHub, arXiv | Direct integrations for academic and open-source signals |
 
 ## Architecture
 
 ```
 src/
 ├── components/
-│   ├── admin/          # ReviewCard, PeopleTable, PersonFormModal, ModelPicker, CollectorStatusCard
-│   ├── common/         # ProtectedRoute, AdminRoute, MoveTypeBadge, ConfidenceBadge, TierBadge
-│   ├── dashboard/      # MoveEventCard, MoveEventFeed, FilterSidebar, StatsBar
+│   ├── admin/          # ReviewCard, PeopleTable, PersonFormModal, ModelPicker
+│   ├── common/         # ProtectedRoute, AdminRoute, Badges, Avatar, SocialIcons
+│   ├── dashboard/      # ExpandableMoveCard, FilterBar, PersonRoster, StatsFooter
 │   ├── layout/         # Navbar, AppLayout, AdminLayout
 │   ├── person/         # PersonHeader, SourceLinks, MoveTimeline
 │   └── suggestions/    # SuggestionForm, SuggestionCard
 ├── config/             # Firebase initialization
 ├── constants/          # Target companies list
-├── contexts/           # AuthContext (Google OAuth + admin claims)
-├── hooks/              # useMoveEvents, usePeople, useSuggestions, useConfig, useAuth
+├── contexts/           # AuthContext (Google OAuth + admin custom claims)
+├── hooks/              # useMoveEvents, usePeople, useSuggestions, useConfig
 ├── pages/
-│   ├── admin/          # AdminDashboard, AdminReview, AdminPeople, AdminSettings, AdminCollectors
-│   ├── Dashboard.tsx
-│   ├── Landing.tsx
+│   ├── admin/          # Dashboard, Review, People, Settings, Collectors
+│   ├── Dashboard.tsx   # Main feed
+│   ├── Landing.tsx     # Public landing page
 │   ├── PersonProfile.tsx
-│   ├── SuggestPerson.tsx
 │   └── Suggestions.tsx
-├── services/           # Firestore CRUD, OpenRouter API
+├── services/           # Firestore CRUD, OpenRouter API client
 └── types/              # Shared TypeScript interfaces
 
 functions/src/
-├── ai/                 # brain.ts — Firestore trigger, OpenRouter classification
-├── admin/              # set-admin.ts — callable for admin claims
-├── collectors/         # semantic-scholar, github-bios, news-rss, apify-linkedin, apify-x
-├── utils/              # collector-base.ts — shared snapshot/diff utilities
-├── types.ts            # Server-side type definitions
+├── ai/brain.ts         # Firestore onCreate trigger → OpenRouter classification
+├── admin/              # Callable functions: set-admin, run-collector, verify-source
+├── collectors/         # 7 collectors (semantic-scholar, github-bios, news-rss, etc.)
+├── utils/              # CollectorBase — shared snapshot/diff utilities
 └── index.ts            # All function exports
+```
 
-scripts/
-└── seed.ts             # Seeds 10 legendary AI figures + default config
+## Key Engineering Decisions
+
+- **Event-driven pipeline, not batch.** Collectors write raw signals to Firestore. The AI brain fires on `onCreate` — no cron job stitching data together after the fact. Each signal is processed as it arrives.
+- **Snapshot/diff collector pattern.** Every collector extends a shared base that stores the last-known state per person. On each run, it diffs current vs. previous and only emits changes. This minimizes noise and API usage.
+- **Model-agnostic AI.** The brain calls OpenRouter, not a specific model. Admins can swap between Claude, GPT-4, Gemini, or Llama from a settings page — no code change required.
+- **Confidence scoring, not binary classification.** Moves are tagged `confirmed`, `high`, `medium`, or `speculative` based on signal count and source quality. The dashboard respects this — users can filter by confidence.
+- **Admin review as a gate.** AI-classified moves land in a review queue, not directly on the public feed. This keeps accuracy high while still automating 95% of the work.
+
+## Data Model
+
+```
+Person
+├── name, slug, photoUrl
+├── currentOrg, currentTitle, previousOrgs[]
+├── tier: legendary | senior | notable | emerging
+├── sources: { linkedin?, github?, scholar?, x?, website? }
+└── rawChanges/           ← subcollection, collector writes here
+    └── {changeId}        ← triggers AI brain on create
+
+MoveEvent
+├── personId, type, fromOrg, toOrg
+├── confidence: confirmed | high | medium | speculative
+├── signals[]             ← evidence from collectors
+├── aiSummary             ← generated explanation
+└── status: pending_review | published | dismissed
+
+AppConfig
+└── openrouter model, collector schedules, target companies
 ```
 
 ## Getting Started
@@ -123,29 +198,20 @@ scripts/
 
 - Node.js 22+
 - Firebase CLI (`npm i -g firebase-tools`)
-- Firebase project with Blaze plan (for Cloud Functions)
+- Firebase project on Blaze plan
 
 ### Install
 
 ```bash
-# Frontend dependencies
 npm install
-
-# Functions dependencies
 cd functions && npm install && cd ..
 ```
 
-### Environment Setup
+### Environment
 
-Create a `.env` file with your Firebase config:
-
-```env
-VITE_FIREBASE_API_KEY=your-api-key
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project-id
-VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-VITE_FIREBASE_APP_ID=your-app-id
+```bash
+cp .env.example .env
+# Fill in your Firebase config values
 ```
 
 ### Development
@@ -154,19 +220,12 @@ VITE_FIREBASE_APP_ID=your-app-id
 npm run dev
 ```
 
-### Build & Deploy
+### Deploy
 
 ```bash
-# Build frontend
-npm run build
-
-# Deploy everything
-firebase deploy
-
-# Or deploy individually
-firebase deploy --only hosting
-firebase deploy --only functions
-firebase deploy --only firestore:rules
+firebase deploy                  # Everything
+firebase deploy --only hosting   # Frontend only
+firebase deploy --only functions # Cloud Functions only
 ```
 
 ### Seed Data
@@ -177,7 +236,11 @@ npx tsx scripts/seed.ts
 
 ## Security
 
-- Firestore rules enforce public read, admin-only write, authenticated suggestions
-- Admin access controlled via Firebase custom claims
-- Apify and OpenRouter API keys stored in Firebase Secret Manager
-- Google OAuth for authentication
+- **Firestore rules:** Public read, admin-only write, authenticated suggestions
+- **Admin access:** Firebase custom claims (`isAdmin`), not role fields
+- **Secrets:** API keys for OpenRouter, Apify, and GitHub stored in Firebase Secret Manager via `defineSecret()` — never in source code
+- **Auth:** Google OAuth with popup flow
+
+## License
+
+MIT
