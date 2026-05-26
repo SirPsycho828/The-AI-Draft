@@ -97,8 +97,8 @@ export function ModelPicker({ config }: Props) {
   return (
     <div className="space-y-6">
       {/* API Key */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">
+      <div className="bg-card border border-border rounded-[var(--radius-lg)] p-5">
+        <h3 className="text-[0.6875rem] font-700 tracking-[0.08em] uppercase text-muted-foreground mb-3">
           API Key
         </h3>
         <div className="flex gap-2">
@@ -108,40 +108,40 @@ export function ModelPicker({ config }: Props) {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-or-..."
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 pr-10 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="w-full bg-secondary border border-border rounded-[var(--radius-md)] px-3 py-2.5 pr-10 text-sm text-foreground focus:border-primary/40 focus:outline-none transition-colors duration-[var(--duration-fast)] placeholder-muted-foreground/60"
             />
             <button
               onClick={() => setShowKey(!showKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               type="button"
             >
-              {showKey ? '◉' : '○'}
+              {showKey ? '\u25C9' : '\u25CB'}
             </button>
           </div>
           <button
             onClick={handleRefreshModels}
             disabled={refreshing}
-            className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+            className="bg-primary text-primary-foreground disabled:opacity-50 px-4 py-2.5 rounded-[var(--radius-md)] text-[0.8125rem] font-700 tracking-[0.06em] uppercase hover:brightness-110 transition-all duration-[var(--duration-fast)] whitespace-nowrap"
           >
             {refreshing ? 'Loading...' : 'Refresh Models'}
           </button>
         </div>
-        {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
-        {success && <p className="text-green-400 text-xs mt-2">{success}</p>}
-        <p className="text-xs text-gray-600 mt-2">
+        {error && <p className="text-destructive text-xs mt-2">{error}</p>}
+        {success && <p className="text-success text-xs mt-2">{success}</p>}
+        <p className="text-xs text-muted-foreground/60 mt-2">
           Used client-side to fetch models. The AI Brain uses the key stored in Secret Manager.
         </p>
       </div>
 
       {/* Active Model */}
       {activeModel && (
-        <div className="bg-gray-900 border border-blue-500/30 rounded-xl p-5">
-          <p className="text-xs font-medium text-blue-400 uppercase tracking-wider mb-1">
+        <div className="bg-card border border-primary/30 rounded-[var(--radius-lg)] p-5">
+          <p className="text-[0.625rem] font-700 tracking-[0.08em] uppercase text-primary mb-1">
             Active Model
           </p>
-          <p className="text-lg font-semibold">{activeModel.name}</p>
-          <p className="text-xs text-gray-500 mt-1 font-mono">{activeModel.id}</p>
-          <div className="flex gap-4 mt-2 text-xs text-gray-400">
+          <p className="text-lg font-600 text-foreground">{activeModel.name}</p>
+          <p className="text-xs text-muted-foreground mt-1 font-mono">{activeModel.id}</p>
+          <div className="flex gap-4 mt-2 text-xs text-card-foreground">
             <span>Prompt: {formatPrice(activeModel.pricing.prompt)}</span>
             <span>Completion: {formatPrice(activeModel.pricing.completion)}</span>
             <span>Context: {formatContext(activeModel.context_length)}</span>
@@ -151,16 +151,16 @@ export function ModelPicker({ config }: Props) {
 
       {/* Model List */}
       {models.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-gray-800">
+        <div className="bg-card border border-border rounded-[var(--radius-lg)] overflow-hidden">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+              <h3 className="text-[0.6875rem] font-700 tracking-[0.08em] uppercase text-muted-foreground">
                 Select Model
               </h3>
-              <span className="text-xs text-gray-600">
+              <span className="text-xs text-muted-foreground/60">
                 {models.length} models
                 {config.openrouter.lastModelRefresh && (
-                  <> · {new Date(config.openrouter.lastModelRefresh.seconds * 1000).toLocaleDateString()}</>
+                  <> &middot; {new Date(config.openrouter.lastModelRefresh.seconds * 1000).toLocaleDateString()}</>
                 )}
               </span>
             </div>
@@ -169,14 +169,14 @@ export function ModelPicker({ config }: Props) {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter models..."
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="w-full bg-secondary border border-border rounded-[var(--radius-md)] px-3 py-2 text-sm text-foreground focus:border-primary/40 focus:outline-none transition-colors duration-[var(--duration-fast)] placeholder-muted-foreground/60"
             />
           </div>
 
           <div className="max-h-[480px] overflow-y-auto">
             {favoriteModels.length > 0 && (
               <>
-                <div className="sticky top-0 z-10 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-400 uppercase tracking-wider border-b border-amber-500/20">
+                <div className="sticky top-0 z-10 bg-tier-legendary/10 px-4 py-1.5 text-[0.625rem] font-700 tracking-[0.08em] uppercase text-tier-legendary border-b border-tier-legendary/20">
                   Favorites
                 </div>
                 {favoriteModels.map((m) => (
@@ -194,7 +194,7 @@ export function ModelPicker({ config }: Props) {
 
             {freeModels.length > 0 && (
               <>
-                <div className="sticky top-0 z-10 bg-green-500/10 px-4 py-1.5 text-xs font-semibold text-green-400 uppercase tracking-wider border-b border-green-500/20">
+                <div className="sticky top-0 z-10 bg-success/10 px-4 py-1.5 text-[0.625rem] font-700 tracking-[0.08em] uppercase text-success border-b border-success/20">
                   Free Models
                 </div>
                 {freeModels.map((m) => (
@@ -212,7 +212,7 @@ export function ModelPicker({ config }: Props) {
 
             {paidModels.length > 0 && (
               <>
-                <div className="sticky top-0 z-10 bg-gray-800 px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700">
+                <div className="sticky top-0 z-10 bg-secondary px-4 py-1.5 text-[0.625rem] font-700 tracking-[0.08em] uppercase text-muted-foreground border-b border-border">
                   Paid Models
                 </div>
                 {paidModels.map((m) => (
@@ -229,7 +229,7 @@ export function ModelPicker({ config }: Props) {
             )}
 
             {filtered.length === 0 && (
-              <p className="text-center text-gray-600 py-8 text-sm">No models match "{filter}"</p>
+              <p className="text-center text-muted-foreground py-8 text-sm">No models match &ldquo;{filter}&rdquo;</p>
             )}
           </div>
         </div>
@@ -255,45 +255,45 @@ function ModelRow({
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 border-b border-gray-800/50 hover:bg-gray-800/50 transition-colors ${
-        isActive ? 'bg-blue-500/10 border-l-2 border-l-blue-500' : ''
+      className={`flex items-center gap-3 px-4 py-2.5 border-b border-border/50 hover:bg-secondary/50 transition-colors duration-[var(--duration-fast)] ${
+        isActive ? 'bg-primary/5 border-l-2 border-l-primary' : ''
       }`}
     >
       <button
         onClick={() => onToggleFavorite(model.id)}
-        className={`text-lg shrink-0 ${isFavorite ? 'text-amber-400' : 'text-gray-700 hover:text-gray-500'}`}
+        className={`text-lg shrink-0 transition-colors duration-[var(--duration-fast)] ${isFavorite ? 'text-tier-legendary' : 'text-border hover:text-muted-foreground'}`}
         title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       >
-        {isFavorite ? '★' : '☆'}
+        {isFavorite ? '\u2605' : '\u2606'}
       </button>
 
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${isActive ? 'text-blue-400' : ''}`}>
+        <p className={`text-sm font-500 truncate ${isActive ? 'text-primary' : 'text-foreground'}`}>
           {model.name}
         </p>
-        <p className="text-xs text-gray-600 truncate font-mono">{model.id}</p>
+        <p className="text-xs text-muted-foreground/60 truncate font-mono">{model.id}</p>
       </div>
 
-      <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
-        isFree ? 'bg-green-500/10 text-green-400' : 'text-gray-500'
+      <span className={`text-xs px-2 py-0.5 rounded-[var(--radius-sm)] shrink-0 ${
+        isFree ? 'bg-success/10 text-success' : 'text-muted-foreground'
       }`}>
         {formatPrice(model.pricing.prompt)}
       </span>
 
-      <span className="text-xs text-gray-600 w-14 text-right shrink-0">
+      <span className="text-xs text-muted-foreground/60 w-14 text-right shrink-0">
         {formatContext(model.context_length)}
       </span>
 
       <button
         onClick={() => onSelect(model.id)}
         disabled={isActive}
-        className={`text-xs px-3 py-1 rounded-lg shrink-0 transition-colors ${
+        className={`text-xs px-3 py-1 rounded-[var(--radius-md)] shrink-0 transition-all duration-[var(--duration-fast)] ${
           isActive
-            ? 'bg-blue-500/20 text-blue-400 cursor-default'
-            : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+            ? 'bg-primary/20 text-primary cursor-default'
+            : 'bg-secondary hover:bg-muted text-card-foreground'
         }`}
       >
-        {isActive ? '✓ Active' : 'Use'}
+        {isActive ? '\u2713 Active' : 'Use'}
       </button>
     </div>
   );

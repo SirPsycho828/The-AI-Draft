@@ -32,3 +32,16 @@ dist-ssr
 
 # Playwright MCP
 .playwright-mcp/
+
+# Compiled Cloud Functions output
+functions/lib/
+
+# Development screenshots
+*.png
+
+# Firebase storage rules (local dev)
+storage.rules
+
+# AI tooling artifacts
+docs/superpowers/
+docs/design-overhaul-state.md

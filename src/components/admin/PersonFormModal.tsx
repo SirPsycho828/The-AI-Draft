@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Timestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../config/firebase';
+import { functions, storage } from '../../config/firebase';
 import { addPerson, updatePerson } from '../../services/firestore';
 import type { Person, Tier, AddedBy } from '../../types';
 
@@ -23,10 +24,10 @@ function slugify(name: string): string {
 }
 
 const STATUS_STYLES: Record<VerifyStatus, string> = {
-  idle: 'border-gray-700',
-  checking: 'border-yellow-500/50',
-  valid: 'border-green-500/50',
-  invalid: 'border-red-500/50',
+  idle: 'border-border',
+  checking: 'border-warning/50',
+  valid: 'border-success/50',
+  invalid: 'border-destructive/50',
 };
 
 const STATUS_ICON: Record<VerifyStatus, string> = {
@@ -37,11 +38,14 @@ const STATUS_ICON: Record<VerifyStatus, string> = {
 };
 
 const STATUS_COLOR: Record<VerifyStatus, string> = {
-  idle: 'text-gray-500',
-  checking: 'text-yellow-400',
-  valid: 'text-green-400',
-  invalid: 'text-red-400',
+  idle: 'text-muted-foreground',
+  checking: 'text-warning',
+  valid: 'text-success',
+  invalid: 'text-destructive',
 };
+
+const inputClass = 'w-full bg-secondary border border-border rounded-[var(--radius-md)] px-3 py-2 text-sm text-foreground focus:border-primary/40 focus:outline-none transition-colors duration-[var(--duration-fast)] placeholder-muted-foreground/60';
+const labelClass = 'block text-xs font-600 text-muted-foreground mb-1';
 
 export function PersonFormModal({ person, onClose }: Props) {
   const [name, setName] = useState(person?.name ?? '');
@@ -49,7 +53,9 @@ export function PersonFormModal({ person, onClose }: Props) {
   const [currentTitle, setCurrentTitle] = useState(person?.currentTitle ?? '');
   const [tier, setTier] = useState<Tier>(person?.tier ?? 'notable');
   const [photoUrl, setPhotoUrl] = useState(person?.photoUrl ?? '');
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [github, setGithub] = useState<SourceFieldState>({
     value: person?.sources.githubUsername ?? '', status: 'idle',
@@ -89,6 +95,25 @@ export function PersonFormModal({ person, onClose }: Props) {
     },
     []
   );
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const slug = slugify(name || 'person');
+      const storageRef = ref(storage, `people-photos/${slug}-${Date.now()}.${ext}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setPhotoUrl(url);
+    } catch (err) {
+      console.error('Photo upload failed:', err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const hasUnverifiedSources = [github, linkedin, xHandle, scholar].some(
     (s) => s.value.trim() && s.status === 'idle'
@@ -134,57 +159,132 @@ export function PersonFormModal({ person, onClose }: Props) {
     onClose();
   };
 
-  const inputBase = 'flex-1 bg-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none border';
+  const inputBase = 'flex-1 bg-secondary rounded-[var(--radius-md)] px-3 py-2 text-sm text-foreground focus:border-primary/40 focus:outline-none border transition-colors duration-[var(--duration-fast)]';
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-bold mb-4">{person ? 'Edit Person' : 'Add Person'}</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card border border-border rounded-[var(--radius-lg)] p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <h2 className="font-heading text-xl tracking-[0.03em] text-foreground mb-4">
+          {person ? 'EDIT PERSON' : 'ADD PERSON'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Name" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none" />
-          <input type="text" value={currentOrg} onChange={(e) => setCurrentOrg(e.target.value)} required placeholder="Current Organization" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none" />
-          <input type="text" value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="Title (optional)" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none" />
-          <input type="url" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="Photo URL (optional)" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none" />
-          <select value={tier} onChange={(e) => setTier(e.target.value as Tier)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none">
-            <option value="legendary">Legendary</option>
-            <option value="senior">Senior</option>
-            <option value="notable">Notable</option>
-            <option value="emerging">Emerging</option>
-          </select>
+          <div>
+            <label className={labelClass}>Name *</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. Mira Murati" className={inputClass} />
+          </div>
 
-          <div className="border-t border-gray-800 pt-3 mt-3">
-            <p className="text-xs text-gray-400 mb-2">Source Links — verify before saving</p>
+          <div>
+            <label className={labelClass}>Organization *</label>
+            <input type="text" value={currentOrg} onChange={(e) => setCurrentOrg(e.target.value)} required placeholder="e.g. Thinking Machines Lab" className={inputClass} />
+          </div>
 
-            {/* GitHub */}
+          <div>
+            <label className={labelClass}>Title</label>
+            <input type="text" value={currentTitle} onChange={(e) => setCurrentTitle(e.target.value)} placeholder="e.g. CEO & Co-founder" className={inputClass} />
+          </div>
+
+          {/* Photo section */}
+          <div>
+            <label className={labelClass}>Profile Photo</label>
+            <div className="flex items-center gap-3">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="shrink-0 w-14 h-14 rounded-full bg-secondary border-2 border-dashed border-border hover:border-primary/40 cursor-pointer flex items-center justify-center overflow-hidden transition-colors duration-[var(--duration-fast)]"
+                title="Click to upload photo"
+              >
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Preview" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <input
+                  type="url"
+                  value={photoUrl}
+                  onChange={(e) => setPhotoUrl(e.target.value)}
+                  placeholder="Paste image URL..."
+                  className={`${inputClass} !text-xs`}
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="text-xs text-primary hover:brightness-110 transition-all disabled:opacity-50"
+                  >
+                    {uploading ? 'Uploading...' : 'Upload file'}
+                  </button>
+                  {photoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setPhotoUrl('')}
+                      className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Tier</label>
+            <select value={tier} onChange={(e) => setTier(e.target.value as Tier)} className={inputClass}>
+              <option value="legendary">Legendary</option>
+              <option value="senior">Senior</option>
+              <option value="notable">Notable</option>
+              <option value="emerging">Emerging</option>
+            </select>
+          </div>
+
+          <div className="border-t border-border pt-3 mt-3">
+            <p className="text-xs text-muted-foreground mb-2 font-600">Source Links — verify before saving</p>
+
             <SourceField
-              placeholder="GitHub username"
+              label="GitHub"
+              placeholder="username"
+              url={github.value.trim() ? `https://github.com/${github.value.trim()}` : undefined}
               state={github}
               onChange={(v) => setGithub({ value: v, status: 'idle', label: undefined })}
               onVerify={() => verify('github', github.value, setGithub)}
               inputBase={inputBase}
             />
 
-            {/* LinkedIn */}
             <SourceField
-              placeholder="LinkedIn slug (e.g. john-doe-1234)"
+              label="LinkedIn"
+              placeholder="slug (e.g. john-doe-1234)"
+              url={linkedin.value.trim() ? `https://linkedin.com/in/${linkedin.value.trim()}` : undefined}
               state={linkedin}
               onChange={(v) => setLinkedin({ value: v, status: 'idle', label: undefined })}
               onVerify={() => verify('linkedin', linkedin.value, setLinkedin)}
               inputBase={inputBase}
             />
 
-            {/* X Handle */}
             <SourceField
-              placeholder="X handle (e.g. @username)"
+              label="X / Twitter"
+              placeholder="@handle"
+              url={xHandle.value.trim() ? `https://x.com/${xHandle.value.trim().replace('@', '')}` : undefined}
               state={xHandle}
               onChange={(v) => setXHandle({ value: v, status: 'idle', label: undefined })}
               onVerify={() => verify('x', xHandle.value, setXHandle)}
               inputBase={inputBase}
             />
 
-            {/* Semantic Scholar */}
             <SourceField
-              placeholder="Semantic Scholar ID (numeric)"
+              label="Semantic Scholar"
+              placeholder="Author ID (numeric)"
+              url={scholar.value.trim() ? `https://www.semanticscholar.org/author/${scholar.value.trim()}` : undefined}
               state={scholar}
               onChange={(v) => setScholar({ value: v, status: 'idle', label: undefined })}
               onVerify={() => verify('semanticScholar', scholar.value, setScholar)}
@@ -193,11 +293,11 @@ export function PersonFormModal({ person, onClose }: Props) {
           </div>
 
           {hasInvalidSources && (
-            <p className="text-red-400 text-xs">Fix invalid sources before saving.</p>
+            <p className="text-destructive text-xs">Fix invalid sources before saving.</p>
           )}
 
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-[var(--duration-fast)]">Cancel</button>
             {hasUnverifiedSources && (
               <button
                 type="button"
@@ -207,7 +307,7 @@ export function PersonFormModal({ person, onClose }: Props) {
                   if (xHandle.value.trim() && xHandle.status === 'idle') verify('x', xHandle.value, setXHandle);
                   if (scholar.value.trim() && scholar.status === 'idle') verify('semanticScholar', scholar.value, setScholar);
                 }}
-                className="px-4 py-2 text-sm text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/10 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-warning border border-warning/30 hover:bg-warning/10 rounded-[var(--radius-md)] transition-all duration-[var(--duration-fast)]"
               >
                 Verify All
               </button>
@@ -215,7 +315,7 @@ export function PersonFormModal({ person, onClose }: Props) {
             <button
               type="submit"
               disabled={saving || hasInvalidSources}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="bg-primary text-primary-foreground disabled:opacity-50 px-4 py-2 rounded-[var(--radius-md)] text-sm font-700 tracking-[0.06em] uppercase hover:brightness-110 transition-all duration-[var(--duration-fast)]"
             >
               {saving ? 'Saving...' : person ? 'Save Changes' : 'Add Person'}
             </button>
@@ -227,20 +327,32 @@ export function PersonFormModal({ person, onClose }: Props) {
 }
 
 function SourceField({
+  label,
   placeholder,
+  url,
   state,
   onChange,
   onVerify,
   inputBase,
 }: {
+  label: string;
   placeholder: string;
+  url?: string;
   state: SourceFieldState;
   onChange: (v: string) => void;
   onVerify: () => void;
   inputBase: string;
 }) {
   return (
-    <div className="mb-2">
+    <div className="mb-2.5">
+      <div className="flex items-center gap-1.5 mb-1">
+        <label className="text-xs font-600 text-muted-foreground">{label}</label>
+        {url && (
+          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:brightness-110 transition-all" title={url}>
+            &#8599;
+          </a>
+        )}
+      </div>
       <div className="flex gap-1.5 items-center">
         <input
           type="text"
@@ -254,7 +366,7 @@ function SourceField({
             type="button"
             onClick={onVerify}
             disabled={state.status === 'checking'}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg border border-gray-700 hover:border-gray-500 text-sm font-bold transition-colors disabled:opacity-50"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-[var(--radius-md)] border border-border hover:border-muted-foreground/50 text-sm font-bold transition-all duration-[var(--duration-fast)] disabled:opacity-50"
             title="Verify"
           >
             <span className={STATUS_COLOR[state.status]}>

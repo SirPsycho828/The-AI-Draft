@@ -27,42 +27,42 @@ export function ReviewCard({ event, person }: Props) {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+    <div className="bg-card border border-border rounded-[var(--radius-lg)] p-5">
       <div className="flex items-center gap-2 mb-3">
         <MoveTypeBadge type={event.type} />
         <ConfidenceBadge confidence={event.confidence} />
-        <span className="text-xs text-gray-500 ml-auto">
+        <span className="text-xs text-muted-foreground ml-auto">
           Model: {event.aiModel}
         </span>
       </div>
 
-      <h3 className="text-lg font-semibold">{person?.name ?? 'Unknown'}</h3>
-      <div className="mt-1 text-sm text-gray-400">
+      <h3 className="text-lg font-600 text-foreground">{person?.name ?? 'Unknown'}</h3>
+      <div className="mt-1 text-sm text-card-foreground">
         {event.fromOrg && <span>{event.fromOrg}</span>}
-        {event.fromOrg && event.toOrg && <span className="mx-2">→</span>}
+        {event.fromOrg && event.toOrg && <span className="mx-2 text-muted-foreground">&rarr;</span>}
         {event.toOrg && <span>{event.toOrg}</span>}
       </div>
 
       <div className="mt-3 space-y-1">
-        <p className="text-xs font-medium text-gray-400">Signals:</p>
+        <p className="text-[0.625rem] font-600 tracking-[0.08em] uppercase text-muted-foreground">Signals</p>
         {event.signals.map((s, i) => (
-          <p key={i} className="text-xs text-gray-500">
-            [{s.source}] {s.description}
+          <p key={i} className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground/60">[{s.source}]</span> {s.description}
           </p>
         ))}
       </div>
 
       <div className="mt-3">
-        <p className="text-xs font-medium text-gray-400 mb-1">AI Summary:</p>
+        <p className="text-[0.625rem] font-600 tracking-[0.08em] uppercase text-muted-foreground mb-1">AI Summary</p>
         {editing ? (
           <textarea
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             rows={3}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none resize-none"
+            className="w-full bg-secondary border border-border rounded-[var(--radius-md)] px-3 py-2 text-sm text-foreground focus:border-primary/40 focus:outline-none resize-none transition-colors duration-[var(--duration-fast)]"
           />
         ) : (
-          <p className="text-sm text-gray-300">{event.aiSummary}</p>
+          <p className="text-sm text-card-foreground">{event.aiSummary}</p>
         )}
       </div>
 
@@ -70,14 +70,14 @@ export function ReviewCard({ event, person }: Props) {
         <button
           onClick={handlePublish}
           disabled={acting}
-          className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
+          className="bg-success hover:brightness-110 disabled:opacity-50 text-white px-4 py-1.5 rounded-[var(--radius-md)] text-[0.8125rem] font-600 transition-all duration-[var(--duration-fast)]"
         >
           {editing ? 'Save & Publish' : 'Publish'}
         </button>
         {!editing && (
           <button
             onClick={() => setEditing(true)}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            className="bg-secondary hover:bg-muted text-card-foreground px-4 py-1.5 rounded-[var(--radius-md)] text-[0.8125rem] font-600 transition-all duration-[var(--duration-fast)]"
           >
             Edit & Publish
           </button>
@@ -85,7 +85,7 @@ export function ReviewCard({ event, person }: Props) {
         <button
           onClick={handleDismiss}
           disabled={acting}
-          className="text-gray-500 hover:text-red-400 px-4 py-1.5 rounded-lg text-sm transition-colors ml-auto"
+          className="text-muted-foreground hover:text-destructive px-4 py-1.5 rounded-[var(--radius-md)] text-[0.8125rem] transition-colors duration-[var(--duration-fast)] ml-auto"
         >
           Dismiss
         </button>
