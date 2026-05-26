@@ -45,3 +45,4 @@ storage.rules
 # AI tooling artifacts
 docs/superpowers/
 docs/design-overhaul-state.md
+.claude/
