@@ -1,16 +1,16 @@
 import { Link } from 'react-router-dom';
-import type { Person } from '../../types';
+import type { Person, Tier } from '../../types';
 import { PersonAvatar } from '../common/PersonAvatar';
 import { SocialIcons } from '../common/SocialIcons';
 
-const TIER_DOT: Record<string, string> = {
+const TIER_DOT: Record<Tier, string> = {
   legendary: 'bg-amber-400',
   senior: 'bg-blue-400',
   notable: 'bg-gray-400',
   emerging: 'bg-green-400',
 };
 
-const TIER_LETTER: Record<string, string> = {
+const TIER_LETTER: Record<Tier, string> = {
   legendary: 'L',
   senior: 'S',
   notable: 'N',

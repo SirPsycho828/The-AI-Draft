@@ -7,8 +7,7 @@ import { MoveTypeBadge } from '../common/MoveTypeBadge';
 import { SocialIcons } from '../common/SocialIcons';
 import { CareerTrail } from '../common/CareerTrail';
 import { timeAgo } from '../../utils/timeAgo';
-
-const TIER_ORDER = { legendary: 0, senior: 1, notable: 2, emerging: 3 } as const;
+import { selectFeaturedPerson } from '../../utils/selectFeaturedPerson';
 
 interface FeaturedPersonHeroProps {
   events: MoveEvent[];
@@ -16,29 +15,10 @@ interface FeaturedPersonHeroProps {
 }
 
 export function FeaturedPersonHero({ events, people }: FeaturedPersonHeroProps) {
-  const featured = useMemo(() => {
-    const now = Date.now();
-    const thirtyDaysMs = 30 * 86_400_000;
-
-    const candidates = events
-      .filter((e) => people.has(e.personId))
-      .map((e) => ({
-        event: e,
-        person: people.get(e.personId)!,
-        isRecent: now - e.detectedAt.toDate().getTime() < thirtyDaysMs,
-      }));
-
-    const recent = candidates.filter((c) => c.isRecent);
-    const pool = recent.length > 0 ? recent : candidates;
-
-    pool.sort((a, b) => {
-      const tierDiff = TIER_ORDER[a.person.tier] - TIER_ORDER[b.person.tier];
-      if (tierDiff !== 0) return tierDiff;
-      return b.event.detectedAt.toDate().getTime() - a.event.detectedAt.toDate().getTime();
-    });
-
-    return pool[0] ?? null;
-  }, [events, people]);
+  const featured = useMemo(
+    () => selectFeaturedPerson(events, people),
+    [events, people]
+  );
 
   if (!featured) return null;
 

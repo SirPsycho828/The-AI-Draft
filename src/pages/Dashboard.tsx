@@ -11,9 +11,9 @@ import { FeaturedPersonHero } from '../components/dashboard/FeaturedPersonHero';
 import { PersonRoster } from '../components/dashboard/PersonRoster';
 import { StatsFooter } from '../components/dashboard/StatsFooter';
 import { hotScore } from '../utils/hotScore';
+import { TIER_ORDER } from '../utils/tierOrder';
+import { selectFeaturedPerson } from '../utils/selectFeaturedPerson';
 import type { Person } from '../types';
-
-const TIER_ORDER = { legendary: 0, senior: 1, notable: 2, emerging: 3 } as const;
 
 export default function Dashboard() {
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -108,29 +108,10 @@ export default function Dashboard() {
   }, [people, filters]);
 
   // Featured person ID (to exclude from roster)
-  const featuredPersonId = useMemo(() => {
-    const now = Date.now();
-    const thirtyDaysMs = 30 * 86_400_000;
-
-    const candidates = events
-      .filter((e) => peopleMap.has(e.personId))
-      .map((e) => ({
-        event: e,
-        person: peopleMap.get(e.personId)!,
-        isRecent: now - e.detectedAt.toDate().getTime() < thirtyDaysMs,
-      }));
-
-    const recent = candidates.filter((c) => c.isRecent);
-    const pool = recent.length > 0 ? recent : candidates;
-
-    pool.sort((a, b) => {
-      const tierDiff = TIER_ORDER[a.person.tier] - TIER_ORDER[b.person.tier];
-      if (tierDiff !== 0) return tierDiff;
-      return b.event.detectedAt.toDate().getTime() - a.event.detectedAt.toDate().getTime();
-    });
-
-    return pool[0]?.person.id;
-  }, [events, peopleMap]);
+  const featuredPersonId = useMemo(
+    () => selectFeaturedPerson(events, peopleMap)?.person.id,
+    [events, peopleMap]
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col min-h-[calc(100vh-64px)]">
@@ -144,7 +125,7 @@ export default function Dashboard() {
       />
 
       {/* Split view */}
-      <div className="flex gap-6 mt-6 flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-6 mt-6 flex-1 min-h-0">
         {/* Left column: Feed */}
         <div className="w-full lg:w-3/5 overflow-y-auto space-y-3 pr-1">
           {loading ? (

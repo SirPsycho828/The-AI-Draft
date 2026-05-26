@@ -52,7 +52,7 @@ export function PersonAvatar({
       <img
         src={photoUrl}
         alt={name}
-        className={`${sizeClass} rounded-full object-cover ${ringClass}`}
+        className={`${sizeClass} rounded-full object-cover shrink-0 ${ringClass}`}
       />
     );
   }
