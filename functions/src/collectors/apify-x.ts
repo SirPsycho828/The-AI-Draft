@@ -47,7 +47,18 @@ export async function runX(personIds?: string[]): Promise<void> {
 
     if (people.length === 0) return;
 
-    const handles = people.map((p) => p.sources.xHandle!.replace('@', ''));
+    // Validate X handle format before sending to Apify
+    const xHandleRegex = /^[a-zA-Z0-9_]{1,15}$/;
+    const handles = people
+      .map((p) => p.sources.xHandle!.replace('@', ''))
+      .filter((h) => {
+        if (!xHandleRegex.test(h)) {
+          console.warn(`Invalid X handle format: ${h}`);
+          return false;
+        }
+        return true;
+      });
+    if (handles.length === 0) return;
 
     const run = await client.actor(actorId).call({
       handles,
@@ -99,12 +110,18 @@ export async function runX(personIds?: string[]): Promise<void> {
 
     await updateCollectorStatus(SOURCE, 'success');
   } catch (error) {
-    console.error('Apify X collector error:', error);
+    const safeMessage = error instanceof Error
+      ? error.message.replace(/sk-[^\s]*/gi, '[REDACTED]').replace(/apify_api_[^\s]*/gi, '[REDACTED]')
+      : 'Unknown error';
+    console.error('Apify X collector error:', safeMessage);
     await updateCollectorStatus(SOURCE, 'error');
   }
 }
 
 // Weekly full scan — runs every Sunday at 7 AM UTC (1h after LinkedIn)
+// Security: This is a scheduled function (onSchedule), not callable by users.
+// Only Cloud Scheduler can trigger it. If converting to a callable function (onCall),
+// add explicit auth + admin role checks.
 export const apifyXCollector = onSchedule(
   {
     schedule: 'every sunday 07:00',

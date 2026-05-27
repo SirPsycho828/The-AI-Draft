@@ -29,6 +29,14 @@ dist-ssr
 # Environment
 .env
 .env.local
+.env.production
+
+# Secrets & credentials
+*.pem
+*.key
+*.p12
+id_rsa
+serviceAccount*.json
 
 # Playwright MCP
 .playwright-mcp/
@@ -41,6 +49,9 @@ functions/lib/
 
 # Firebase storage rules (local dev)
 storage.rules
+
+# OS files
+Thumbs.db
 
 # AI tooling artifacts
 docs/superpowers/

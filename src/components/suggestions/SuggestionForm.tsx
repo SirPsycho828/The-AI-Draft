@@ -18,6 +18,22 @@ export function SuggestionForm() {
     e.preventDefault();
     if (!user || !personName.trim() || !reason.trim()) return;
 
+    if (linkedinUrl.trim()) {
+      const linkedinRegex = /^https:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9-]+\/?$/;
+      if (!linkedinRegex.test(linkedinUrl.trim())) {
+        alert('Invalid LinkedIn URL format');
+        return;
+      }
+    }
+
+    if (xHandle.trim()) {
+      const xHandleRegex = /^@?[a-zA-Z0-9_]{1,15}$/;
+      if (!xHandleRegex.test(xHandle.trim())) {
+        alert('Invalid X handle format');
+        return;
+      }
+    }
+
     setSubmitting(true);
     await addSuggestion({
       personName: personName.trim(),

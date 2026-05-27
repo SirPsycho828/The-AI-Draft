@@ -22,7 +22,7 @@ function formatContext(ctx: number): string {
 }
 
 export function ModelPicker({ config }: Props) {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('_or_key') ?? '');
   const [showKey, setShowKey] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('');
@@ -43,6 +43,7 @@ export function ModelPicker({ config }: Props) {
     setError('');
     setSuccess('');
     try {
+      sessionStorage.setItem('_or_key', key);
       const fetched = await fetchOpenRouterModels(key);
       await updateConfig({
         openrouter: {

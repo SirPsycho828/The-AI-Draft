@@ -48,6 +48,17 @@ export async function runLinkedin(personIds?: string[]): Promise<void> {
 
     if (people.length === 0) return;
 
+    // Validate LinkedIn slugs before constructing URLs
+    const linkedinSlugRegex = /^[a-z0-9]([a-z0-9-]{0,98}[a-z0-9])?$/i;
+    people = people.filter((p) => {
+      if (!linkedinSlugRegex.test(p.sources.linkedinSlug!)) {
+        console.warn(`Invalid LinkedIn slug format: ${p.sources.linkedinSlug}`);
+        return false;
+      }
+      return true;
+    });
+    if (people.length === 0) return;
+
     const queries = people.map(
       (p) => `https://www.linkedin.com/in/${p.sources.linkedinSlug}`
     );
@@ -149,12 +160,18 @@ export async function runLinkedin(personIds?: string[]): Promise<void> {
 
     await updateCollectorStatus(SOURCE, 'success');
   } catch (error) {
-    console.error('Apify LinkedIn collector error:', error);
+    const safeMessage = error instanceof Error
+      ? error.message.replace(/sk-[^\s]*/gi, '[REDACTED]').replace(/apify_api_[^\s]*/gi, '[REDACTED]')
+      : 'Unknown error';
+    console.error('Apify LinkedIn collector error:', safeMessage);
     await updateCollectorStatus(SOURCE, 'error');
   }
 }
 
 // Weekly full scan — runs every Sunday at 6 AM UTC
+// Security: This is a scheduled function (onSchedule), not callable by users.
+// Only Cloud Scheduler can trigger it. If converting to a callable function (onCall),
+// add explicit auth + admin role checks.
 export const apifyLinkedinCollector = onSchedule(
   {
     schedule: 'every sunday 06:00',
